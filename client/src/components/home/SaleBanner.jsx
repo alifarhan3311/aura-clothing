@@ -56,7 +56,7 @@ export default function SaleBanner() {
               </div>
 
               <Link
-                to="/women"
+                to="/shop"
                 className="group inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-semibold px-8 py-3.5 rounded-full transition-colors duration-200 text-sm"
               >
                 Shop the Sale

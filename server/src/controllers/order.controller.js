@@ -181,7 +181,7 @@ export const createOrder = async (req, res) => {
     // User confirmation
     sendMail(
       shippingInfo.email,
-      "Order Received – MH Clothing",
+      "Order Received – Fade Find",
       orderConfirmationEmail(populated)
     ).catch((e) => console.error("[mail] user confirm:", e.message));
 
@@ -353,7 +353,7 @@ export const updateOrderStatus = async (req, res) => {
         // Generic status update
         sendMail(
           userEmail,
-          `Order Update: ${status.charAt(0).toUpperCase() + status.slice(1)} – MH Clothing`,
+          `Order Update: ${status.charAt(0).toUpperCase() + status.slice(1)} – Fade Find`,
           orderStatusUpdateEmail(order, note)
         ).catch((e) => console.error("[mail] status update:", e.message));
       }
@@ -429,7 +429,7 @@ export const cancelOrderByUser = async (req, res) => {
     if (userEmail) {
       sendMail(
         userEmail,
-        "Cancel Request Received – MH Clothing",
+        "Cancel Request Received – Fade Find",
         cancelRequestAckEmail(order, trimmedReason)
       ).catch((e) => console.error("[mail] cancel ack:", e.message));
     }
@@ -480,7 +480,7 @@ export const approveCancelRequest = async (req, res) => {
     if (userEmail) {
       sendMail(
         userEmail,
-        "Your Cancellation Request Has Been Approved – MH Clothing",
+        "Your Cancellation Request Has Been Approved – Fade Find",
         orderStatusUpdateEmail(order, note.trim() || "Your cancellation request has been approved.")
       ).catch((e) => console.error("[mail] cancel approved:", e.message));
     }
@@ -542,7 +542,7 @@ export const rejectCancelRequest = async (req, res) => {
     if (userEmail) {
       sendMail(
         userEmail,
-        "Your Cancellation Request Has Been Rejected – MH Clothing",
+        "Your Cancellation Request Has Been Rejected – Fade Find",
         orderStatusUpdateEmail(
           order,
           `Your cancellation request has been rejected. Reason: ${note.trim()}. Your order continues to be processed.`

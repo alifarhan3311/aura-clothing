@@ -3,7 +3,7 @@ export const products = [
   {
     id: 1,
     name: "Silk Drape Midi Dress",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Dresses",
     price: 8500,
@@ -26,7 +26,7 @@ export const products = [
   {
     id: 2,
     name: "Linen Relaxed Blazer",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Outerwear",
     price: 12000,
@@ -48,7 +48,7 @@ export const products = [
   {
     id: 3,
     name: "High-Rise Wide Leg Trousers",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Bottoms",
     price: 6500,
@@ -70,7 +70,7 @@ export const products = [
   {
     id: 4,
     name: "Puff Sleeve Blouse",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Tops",
     price: 4200,
@@ -92,7 +92,7 @@ export const products = [
   {
     id: 5,
     name: "Satin Slip Skirt",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Bottoms",
     price: 5500,
@@ -114,7 +114,7 @@ export const products = [
   {
     id: 6,
     name: "Knit Cardigan Longline",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Tops",
     price: 7800,
@@ -136,7 +136,7 @@ export const products = [
   {
     id: 7,
     name: "Floral Wrap Maxi Dress",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Dresses",
     price: 9500,
@@ -158,7 +158,7 @@ export const products = [
   {
     id: 8,
     name: "Structured Shoulder Bag",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Accessories",
     price: 15000,
@@ -180,7 +180,7 @@ export const products = [
   {
     id: 9,
     name: "Ribbed Bodysuit",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Tops",
     price: 3200,
@@ -202,7 +202,7 @@ export const products = [
   {
     id: 10,
     name: "Tailored Trench Coat",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Outerwear",
     price: 22000,
@@ -224,7 +224,7 @@ export const products = [
   {
     id: 11,
     name: "Pleated Mini Skirt",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Bottoms",
     price: 4500,
@@ -246,7 +246,7 @@ export const products = [
   {
     id: 12,
     name: "Off-Shoulder Evening Gown",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "women",
     subcategory: "Dresses",
     price: 18000,
@@ -270,7 +270,7 @@ export const products = [
   {
     id: 13,
     name: "Slim-Fit Oxford Shirt",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "men",
     subcategory: "Shirts",
     price: 5500,
@@ -292,7 +292,7 @@ export const products = [
   {
     id: 14,
     name: "Tapered Chino Pants",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "men",
     subcategory: "Trousers",
     price: 7000,
@@ -314,7 +314,7 @@ export const products = [
   {
     id: 15,
     name: "Premium Wool Blazer",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "men",
     subcategory: "Outerwear",
     price: 24000,
@@ -336,7 +336,7 @@ export const products = [
   {
     id: 16,
     name: "Oversized Graphic Tee",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "men",
     subcategory: "T-Shirts",
     price: 2800,
@@ -358,7 +358,7 @@ export const products = [
   {
     id: 17,
     name: "Linen Summer Shirt",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "men",
     subcategory: "Shirts",
     price: 6500,
@@ -380,7 +380,7 @@ export const products = [
   {
     id: 18,
     name: "Slim Stretch Jeans",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "men",
     subcategory: "Jeans",
     price: 8500,
@@ -402,7 +402,7 @@ export const products = [
   {
     id: 19,
     name: "Knit Polo Shirt",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "men",
     subcategory: "T-Shirts",
     price: 4500,
@@ -424,7 +424,7 @@ export const products = [
   {
     id: 20,
     name: "Quilted Puffer Vest",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "men",
     subcategory: "Outerwear",
     price: 10000,
@@ -446,7 +446,7 @@ export const products = [
   {
     id: 21,
     name: "Merino Crewneck Sweater",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "men",
     subcategory: "Knitwear",
     price: 13500,
@@ -468,7 +468,7 @@ export const products = [
   {
     id: 22,
     name: "Cargo Jogger Pants",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "men",
     subcategory: "Trousers",
     price: 5500,
@@ -492,7 +492,7 @@ export const products = [
   {
     id: 23,
     name: "Rainbow Stripe Tee",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "kids",
     subcategory: "Tops",
     price: 1800,
@@ -514,7 +514,7 @@ export const products = [
   {
     id: 24,
     name: "Denim Dungarees",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "kids",
     subcategory: "Bottoms",
     price: 4200,
@@ -536,7 +536,7 @@ export const products = [
   {
     id: 25,
     name: "Floral Pinafore Dress",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "kids",
     subcategory: "Dresses",
     price: 3500,
@@ -558,7 +558,7 @@ export const products = [
   {
     id: 26,
     name: "Cosy Fleece Hoodie",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "kids",
     subcategory: "Outerwear",
     price: 3800,
@@ -580,7 +580,7 @@ export const products = [
   {
     id: 27,
     name: "Cargo Shorts",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "kids",
     subcategory: "Bottoms",
     price: 2500,
@@ -602,7 +602,7 @@ export const products = [
   {
     id: 28,
     name: "Graphic Print Sweatshirt",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "kids",
     subcategory: "Tops",
     price: 2800,
@@ -624,7 +624,7 @@ export const products = [
   {
     id: 29,
     name: "Winter Puffer Jacket",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "kids",
     subcategory: "Outerwear",
     price: 7500,
@@ -646,7 +646,7 @@ export const products = [
   {
     id: 30,
     name: "Organic Cotton Pyjama Set",
-    brand: "MH Clothing",
+    brand: "Fade Find",
     category: "kids",
     subcategory: "Sleepwear",
     price: 3200,

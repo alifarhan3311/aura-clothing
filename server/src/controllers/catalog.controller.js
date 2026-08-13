@@ -84,26 +84,26 @@ export const getCatalogBySection = async (req, res) => {
 
     const sectionCategories = await Category.find(sectionCategoryQuery).select("_id name slug image");
 
-    if (sectionCategories.length === 0) {
-      return res.status(200).json({
-        success: true,
-        section,
-        total: 0,
-        page: parseInt(page),
-        totalPages: 0,
-        categories: [],
-        products: [],
-        filters: { brands: [], sizes: [], colors: [], priceRange: { min: 0, max: 0 } },
-      });
-    }
-
     const categoryIds = sectionCategories.map((c) => c._id);
 
     // ── 2. Build product query ────────────────────────────────────────────────
+    // If filtering by a specific category, only show those products
+    // If showing the full section, also include products with no category assigned
     const productQuery = {
       isActive: true,
-      category: { $in: categoryIds },
     };
+
+    if (categoryParam) {
+      // Specific category filter — must match
+      productQuery.category = { $in: categoryIds };
+    } else if (categoryIds.length > 0) {
+      // Whole section — match category in section OR null/unset category
+      productQuery.$or = [
+        { category: { $in: categoryIds } },
+        { category: null },
+        { category: { $exists: false } },
+      ];
+    }
 
     // Optional: full-text name search
     if (search) {

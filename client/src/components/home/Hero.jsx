@@ -10,7 +10,7 @@ export default function Hero() {
       <div className="absolute inset-0">
         <img
           src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=85"
-          alt="MH Clothing Hero"
+          alt="Fade Find Hero"
           className="w-full h-full object-cover object-top opacity-40"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#f7f3ee]/90 via-[#f7f3ee]/60 to-transparent" />
@@ -36,7 +36,7 @@ export default function Hero() {
           >
             Dress in
             <br />
-            <span className="italic text-amber-700">Your MH Clothing</span>
+            <span className="italic text-amber-700">Your Fade Find</span>
           </motion.h1>
 
           <motion.p
@@ -55,20 +55,20 @@ export default function Hero() {
             className="flex flex-wrap gap-3"
           >
             <Link
-              to="/women"
+              to="/shop?section=women"
               className="group inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-3.5 rounded-full text-sm font-semibold hover:bg-amber-700 transition-colors duration-300"
             >
               Shop Women
               <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
-              to="/men"
+              to="/shop?section=men"
               className="inline-flex items-center gap-2 border-2 border-gray-900 text-gray-900 px-7 py-3.5 rounded-full text-sm font-semibold hover:bg-gray-900 hover:text-white transition-colors duration-300"
             >
               Shop Men
             </Link>
             <Link
-              to="/kids"
+              to="/shop?section=kids"
               className="inline-flex items-center gap-2 border border-gray-400 text-gray-600 px-7 py-3.5 rounded-full text-sm font-medium hover:border-gray-900 hover:text-gray-900 transition-colors duration-300"
             >
               Shop Kids

@@ -9,7 +9,7 @@ import { productApi } from '../../lib/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export default function ProductsPage({ products, setProducts, brands = [], categories = [] }) {
+export default function ProductsPage({ products, setProducts, brands = [] }) {
   const [detailItem, setDetailItem] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -219,7 +219,6 @@ export default function ProductsPage({ products, setProducts, brands = [], categ
       >
         <ProductForm
           brands={brands}
-          categories={categories}
           onSubmit={handleCreate}
           onCancel={() => setIsCreateOpen(false)}
         />
@@ -235,7 +234,6 @@ export default function ProductsPage({ products, setProducts, brands = [], categ
         <ProductForm
           initialData={editingItem}
           brands={brands}
-          categories={categories}
           onSubmit={handleEdit}
           onCancel={() => setEditingItem(null)}
         />

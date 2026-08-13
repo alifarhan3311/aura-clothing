@@ -31,7 +31,7 @@ export default function Login() {
       try {
         const res = await login(form.email, form.password);
 
-        toast.success('Welcome back to MH Clothing! 👋', {
+        toast.success('Welcome back to Fade Find! 👋', {
           style: { fontFamily: 'Inter, sans-serif', fontSize: '14px', borderRadius: '8px', background: '#1a1a1a', color: '#fff' },
           iconTheme: { primary: '#c9a96e', secondary: '#fff' },
         });
@@ -69,11 +69,11 @@ export default function Login() {
           <div className="text-center mb-8">
             <Link to="/">
               <span className="text-2xl font-black tracking-[0.25em] text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
-                MH Clothing
+                Fade Find
               </span>
             </Link>
             <h1 className="text-2xl font-bold text-gray-900 mt-4 mb-1">Welcome Back</h1>
-            <p className="text-sm text-gray-500">Sign in to your MH Clothing account</p>
+            <p className="text-sm text-gray-500">Sign in to your Fade Find account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -126,7 +126,7 @@ export default function Login() {
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            New to MH Clothing?{' '}
+            New to Fade Find?{' '}
             <Link to="/register" className="text-amber-700 font-semibold hover:underline">
               Create an account
             </Link>

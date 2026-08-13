@@ -423,7 +423,6 @@ export default function AdminDashboard() {
               products={products}
               setProducts={setProducts}
               brands={brands}
-              categories={categories}
             />
           }
         />

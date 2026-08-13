@@ -5,24 +5,24 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const SECTIONS = [
   { value: 'women', label: 'Women' },
-  { value: 'men',   label: 'Men' },
-  { value: 'kids',  label: 'Kids' },
+  { value: 'men',   label: 'Men'   },
+  { value: 'kids',  label: 'Kids'  },
 ];
 
 export default function CategoryForm({ initialData = null, onSubmit, onCancel }) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [section, setSection] = useState('women');
-  const [isActive, setIsActive] = useState(true);
-  const [imageFile, setImageFile] = useState(null);
+  const [name,         setName]         = useState('');
+  const [description,  setDescription]  = useState('');
+  const [section,      setSection]      = useState('women');
+  const [isActive,     setIsActive]     = useState(true);
+  const [imageFile,    setImageFile]    = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (initialData) {
-      setName(initialData.name || '');
+      setName(initialData.name        || '');
       setDescription(initialData.description || '');
-      setSection(initialData.section || 'women');
+      setSection(initialData.section  || 'women');
       setIsActive(initialData.isActive !== undefined ? initialData.isActive : true);
       if (initialData.image) {
         const src = initialData.image.startsWith('http')
@@ -49,20 +49,18 @@ export default function CategoryForm({ initialData = null, onSubmit, onCancel })
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
-
     const fd = new FormData();
-    fd.append('name', name.trim());
+    fd.append('name',        name.trim());
     fd.append('description', description.trim());
-    fd.append('section', section);
-    fd.append('isActive', String(isActive));
-    if (imageFile) {
-      fd.append('image', imageFile);
-    }
+    fd.append('section',     section);
+    fd.append('isActive',    String(isActive));
+    if (imageFile) fd.append('image', imageFile);
     onSubmit(fd);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+
       {/* Category Name */}
       <div>
         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
@@ -73,7 +71,7 @@ export default function CategoryForm({ initialData = null, onSubmit, onCancel })
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Women's Formals"
+          placeholder="e.g. Women Western"
           className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 focus:border-[#c9a96e] transition-all"
         />
       </div>
@@ -139,7 +137,7 @@ export default function CategoryForm({ initialData = null, onSubmit, onCancel })
           <div className="mt-2.5 flex items-center gap-3 p-2 bg-gray-50 rounded-xl border border-gray-200">
             <img
               src={imagePreview}
-              alt="Category Preview"
+              alt="Preview"
               className="w-16 h-12 rounded-lg object-cover border border-gray-200"
             />
             <span className="text-[11px] text-gray-500 font-medium flex-1">Preview</span>
@@ -158,7 +156,7 @@ export default function CategoryForm({ initialData = null, onSubmit, onCancel })
       <div className="pt-2 flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200">
         <div>
           <span className="text-xs font-bold text-gray-800 block">Active Status</span>
-          <span className="text-[11px] text-gray-500">Enable category visibility in navigation menus</span>
+          <span className="text-[11px] text-gray-500">Enable category visibility in navigation</span>
         </div>
         <label className="relative inline-flex items-center cursor-pointer">
           <input

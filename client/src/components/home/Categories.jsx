@@ -3,29 +3,29 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
-const categories = [
+  const categories = [
   {
     label: 'Women',
-    to: '/women',
+    to: '/shop?section=women',
     image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80',
     subtitle: 'Elegant & Effortless',
     color: '#f0e4cc',
   },
   {
     label: 'Men',
-    to: '/men',
+    to: '/shop?section=men',
     image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80',
     subtitle: 'Sharp & Refined',
     color: '#e8eef5',
   },
   {
     label: 'Kids',
-    to: '/kids',
+    to: '/shop?section=kids',
     image: 'https://images.unsplash.com/photo-1503944168849-8bf86875bbd8?w=800&q=80',
     subtitle: 'Playful & Comfortable',
     color: '#fdf0ed',
   },
-];
+  ];
 
 const containerVariants = {
   hidden: {},

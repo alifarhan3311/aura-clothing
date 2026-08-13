@@ -65,7 +65,7 @@ function layout(title, bodyContent) {
           <tr>
             <td style="background:linear-gradient(135deg,#111827 0%,#292524 100%);padding:32px 40px;text-align:center;">
               <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:900;letter-spacing:0.15em;font-family:'Georgia',serif;">
-                MH Clothing
+                Fade Find
               </h1>
               <p style="margin:6px 0 0;color:#d6d3d1;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;">
                 Premium Fashion
@@ -84,7 +84,7 @@ function layout(title, bodyContent) {
           <tr>
             <td style="background:#f9fafb;padding:24px 40px;text-align:center;border-top:1px solid #e5e7eb;">
               <p style="margin:0 0 4px;font-size:12px;color:#6b7280;">
-                © ${new Date().getFullYear()} MH Clothing · All rights reserved
+                © ${new Date().getFullYear()} Fade Find · All rights reserved
               </p>
               <p style="margin:0;font-size:11px;color:#9ca3af;">
                 This is an automated message, please do not reply directly.
@@ -212,7 +212,7 @@ export function orderConfirmationEmail(order) {
     </p>
   `;
 
-  return layout("Order Confirmation – MH Clothing", body);
+  return layout("Order Confirmation – Fade Find", body);
 }
 
 // ── 2. Admin new-order notification ───────────────────────────────────────────
@@ -311,7 +311,7 @@ export function adminNewOrderEmail(order) {
     </p>
   `;
 
-  return layout("New Order – MH Clothing Admin", body);
+  return layout("New Order – Fade Find Admin", body);
 }
 
 // ── 3. Status Update email (to user) ─────────────────────────────────────────
@@ -380,11 +380,11 @@ export function orderStatusUpdateEmail(order, note = "") {
     </table>
 
     <p style="margin:0;font-size:13px;color:#6b7280;">
-      For any questions, contact our support team. Thank you for choosing MH Clothing!
+      For any questions, contact our support team. Thank you for choosing Fade Find!
     </p>
   `;
 
-  return layout(`Order ${badge.label} – MH Clothing`, body);
+  return layout(`Order ${badge.label} – Fade Find`, body);
 }
 
 // ── 5. Admin cancel request notification ─────────────────────────────────────
@@ -475,7 +475,7 @@ export function adminCancelRequestEmail(order, reason) {
     </div>
   `;
 
-  return layout("Cancel Request – MH Clothing Admin", body);
+  return layout("Cancel Request – Fade Find Admin", body);
 }
 
 // ── 6. Cancel request acknowledgment (to user) ────────────────────────────────
@@ -515,7 +515,7 @@ export function cancelRequestAckEmail(order, reason) {
     </p>
   `;
 
-  return layout("Cancel Request Received – MH Clothing", body);
+  return layout("Cancel Request Received – Fade Find", body);
 }
 
 export function orderTrackingEmail(order) {
@@ -591,5 +591,5 @@ export function orderTrackingEmail(order) {
     </div>
   `;
 
-  return layout("Order Confirmed & Tracking – MH Clothing", body);
+  return layout("Order Confirmed & Tracking – Fade Find", body);
 }

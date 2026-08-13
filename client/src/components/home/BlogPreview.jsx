@@ -26,7 +26,7 @@ const posts = [
     id: 3,
     category: 'Sustainability',
     title: 'Our Commitment to Conscious Fashion',
-    excerpt: "At MH Clothing, we believe style shouldn't come at the planet's expense. Here's how we're changing the industry.",
+    excerpt: "At Fade Find, we believe style shouldn't come at the planet's expense. Here's how we're changing the industry.",
     image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80',
     readTime: '6 min read',
     date: 'Jul 29, 2025',
@@ -39,7 +39,7 @@ export default function BlogPreview() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-xs font-semibold tracking-[0.35em] uppercase text-amber-700 mb-2">The MH Clothing Journal</p>
+            <p className="text-xs font-semibold tracking-[0.35em] uppercase text-amber-700 mb-2">The Fade Find Journal</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
               Style Stories
             </h2>

@@ -156,7 +156,7 @@ export default function VerifyOtp() {
           {/* Logo */}
           <Link to="/">
             <span className="text-xl font-black tracking-[0.25em] text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
-              MH Clothing
+              Fade Find
             </span>
           </Link>
 

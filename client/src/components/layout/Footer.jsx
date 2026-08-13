@@ -4,11 +4,11 @@ import { Share2, Globe, Video, Mail, MapPin, Phone } from 'lucide-react';
 
 const footerLinks = {
   Shop: [
-    { label: 'Women', to: '/women' },
-    { label: 'Men', to: '/men' },
-    { label: 'Kids', to: '/kids' },
-    { label: 'New Arrivals', to: '/women' },
-    { label: 'Sale', to: '/women' },
+    { label: 'Women', to: '/shop?section=women' },
+    { label: 'Men', to: '/shop?section=men' },
+    { label: 'Kids', to: '/shop?section=kids' },
+    { label: 'New Arrivals', to: '/shop' },
+    { label: 'Sale', to: '/shop' },
   ],
   Help: [
     { label: 'Shipping Policy', to: '/contact' },
@@ -36,7 +36,7 @@ export default function Footer() {
         <div className="lg:col-span-2">
           <Link to="/">
             <span className="text-2xl font-black tracking-[0.25em] text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-              MH Clothing
+              Fade Find
             </span>
           </Link>
           <p className="mt-4 text-sm leading-relaxed text-gray-400 max-w-xs">
@@ -54,7 +54,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-2.5">
               <Mail size={14} className="text-amber-500 shrink-0" />
-              <span>hello@MH Clothingclothing.pk</span>
+              <span>hello@Fade Findclothing.pk</span>
             </div>
           </div>
 
@@ -101,7 +101,7 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-          <p>© {new Date().getFullYear()} MH Clothing Clothing. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Fade Find Clothing. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-gray-300 transition-colors">Terms of Service</a>

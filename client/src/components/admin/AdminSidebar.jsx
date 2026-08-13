@@ -78,7 +78,7 @@ export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
           </div>
           <div>
             <h1 className="font-serif font-bold text-lg text-white tracking-wide leading-tight group-hover:text-[#c9a96e] transition-colors">
-              MH Clothing
+              Fade Find
             </h1>
             <span className="text-[10px] font-bold text-[#c9a96e] uppercase tracking-widest block">
               Admin Portal

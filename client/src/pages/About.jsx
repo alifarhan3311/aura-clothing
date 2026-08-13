@@ -32,7 +32,7 @@ export default function About() {
       <section className="relative h-80 sm:h-96 flex items-center overflow-hidden bg-[#f7f3ee]">
         <img
           src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80"
-          alt="About MH Clothing"
+          alt="About Fade Find"
           className="absolute inset-0 w-full h-full object-cover opacity-30"
         />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 w-full text-center">
@@ -47,7 +47,7 @@ export default function About() {
             className="text-4xl sm:text-5xl font-bold text-gray-900"
             style={{ fontFamily: 'Playfair Display, serif' }}
           >
-            About MH Clothing
+            About Fade Find
           </motion.h1>
         </div>
       </section>
@@ -67,7 +67,7 @@ export default function About() {
                 Redefining Fashion for the Modern Pakistani Woman & Man
               </h2>
               <p className="text-gray-600 leading-relaxed mb-4">
-                MH Clothing was born in Lahore in 2019 with a simple but bold belief: that premium fashion should be accessible, thoughtful, and deeply rooted in who you are. We started as a small atelier with a handful of styles and a clear vision — to create clothing that makes people feel extraordinary in the everyday.
+                Fade Find was born in Lahore in 2019 with a simple but bold belief: that premium fashion should be accessible, thoughtful, and deeply rooted in who you are. We started as a small atelier with a handful of styles and a clear vision — to create clothing that makes people feel extraordinary in the everyday.
               </p>
               <p className="text-gray-600 leading-relaxed">
                 Today, we serve thousands of customers across Pakistan, offering curated collections for Women, Men, and Kids that blend contemporary silhouettes with timeless elegance. Every piece in our collection is designed with intention — chosen for its quality, versatility, and ability to make you feel like the best version of yourself.
@@ -81,8 +81,8 @@ export default function About() {
               transition={{ duration: 0.6 }}
               className="grid grid-cols-2 gap-3"
             >
-              <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="MH Clothing story" className="rounded-2xl object-cover aspect-[4/5] w-full" />
-              <img src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=400&q=80" alt="MH Clothing story" className="rounded-2xl object-cover aspect-[4/5] w-full mt-8" />
+              <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="Fade Find story" className="rounded-2xl object-cover aspect-[4/5] w-full" />
+              <img src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=400&q=80" alt="Fade Find story" className="rounded-2xl object-cover aspect-[4/5] w-full mt-8" />
             </motion.div>
           </div>
         </div>

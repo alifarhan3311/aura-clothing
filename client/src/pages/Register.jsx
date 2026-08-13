@@ -76,11 +76,11 @@ export default function Register() {
           <div className="text-center mb-8">
             <Link to="/">
               <span className="text-2xl font-black tracking-[0.25em] text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
-                MH Clothing
+                Fade Find
               </span>
             </Link>
             <h1 className="text-2xl font-bold text-gray-900 mt-4 mb-1">Create Account</h1>
-            <p className="text-sm text-gray-500">Join the MH Clothing family today</p>
+            <p className="text-sm text-gray-500">Join the Fade Find family today</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

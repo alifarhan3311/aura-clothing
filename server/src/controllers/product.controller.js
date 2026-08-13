@@ -16,10 +16,10 @@ export const createProduct = async (req, res) => {
       colors,    // JSON string array or comma-separated: '["Red","Blue"]'
     } = req.body;
 
-    if (!name || !description || !brand || !category) {
+    if (!name || !description || !brand) {
       return res.status(400).json({
         success: false,
-        message: "name, description, brand and category are required",
+        message: "name, description and brand are required",
       });
     }
 
@@ -52,7 +52,7 @@ export const createProduct = async (req, res) => {
       name,
       description,
       brand,
-      category,
+      category: category || null,
       mainImage,
       images,
       colors: parsedColors,

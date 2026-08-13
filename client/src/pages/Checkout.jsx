@@ -121,7 +121,7 @@ export default function Checkout() {
             Order Placed!
           </h1>
           <p className="text-gray-500 mb-1 text-sm">
-            Thank you for shopping with MH Clothing.
+            Thank you for shopping with Fade Find.
           </p>
           <p className="text-xs text-gray-400 mb-6">
             A confirmation email has been sent to <strong>{form.email}</strong>

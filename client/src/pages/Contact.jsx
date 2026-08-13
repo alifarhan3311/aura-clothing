@@ -52,7 +52,7 @@ export default function Contact() {
             {[
               { Icon: MapPin, title: 'Visit Us', value: '14-F, Gulberg III, Lahore, Punjab, Pakistan' },
               { Icon: Phone, title: 'Call Us', value: '+92 300 1234 567' },
-              { Icon: Mail, title: 'Email Us', value: 'hello@MH Clothingclothing.pk' },
+              { Icon: Mail, title: 'Email Us', value: 'hello@Fade Findclothing.pk' },
             ].map(({ Icon, title, value }) => (
               <div key={title} className="flex gap-4">
                 <div className="w-11 h-11 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0">

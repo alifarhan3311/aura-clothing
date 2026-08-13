@@ -1,27 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Tag, Layers, Upload, X, Palette, Images } from 'lucide-react';
+import { Plus, Trash2, Tag, Upload, X, Palette, Images } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export default function ProductForm({ initialData = null, brands = [], categories = [], onSubmit, onCancel }) {
+export default function ProductForm({ initialData = null, brands = [], onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     brand: '',
-    category: '',
     isActive: true,
     isFeatured: false,
-    colors: [],          // product-level colors e.g. ["Red", "Blue"]
+    colors: [],
     variants: [
-      {
-        _id: 'var-temp-1',
-        color: 'Standard',
-        size: 'M',
-        price: 9900,
-        discount: 0,
-        stock: 10,
-        images: [],
-      },
+      { _id: 'var-temp-1', color: 'Standard', size: 'M', price: 9900, discount: 0, stock: 10, images: [] },
     ],
   });
 
@@ -45,37 +36,30 @@ export default function ProductForm({ initialData = null, brands = [], categorie
         name: initialData.name || '',
         description: initialData.description || '',
         brand: typeof initialData.brand === 'object' ? initialData.brand._id : (initialData.brand || (brands[0]?._id || '')),
-        category: typeof initialData.category === 'object' ? initialData.category._id : (initialData.category || (categories[0]?._id || '')),
         isActive: initialData.isActive !== undefined ? initialData.isActive : true,
         isFeatured: initialData.isFeatured !== undefined ? initialData.isFeatured : false,
         colors: initialData.colors || [],
-        variants: initialData.variants && initialData.variants.length > 0 ? initialData.variants : [
+        variants: initialData.variants?.length > 0 ? initialData.variants : [
           { _id: 'var-temp-1', color: 'Standard', size: 'M', price: 9900, discount: 0, stock: 10, images: [] }
         ],
       });
-
       if (initialData.mainImage) {
-        const src = initialData.mainImage.startsWith('http')
-          ? initialData.mainImage
-          : `${API_BASE}${initialData.mainImage}`;
+        const src = initialData.mainImage.startsWith('http') ? initialData.mainImage : `${API_BASE}${initialData.mainImage}`;
         setImagePreview(src);
       }
-
-      // Load existing gallery images
       if (initialData.images?.length) {
         setGalleryPreviews(
-          initialData.images.map((imgPath) => ({
-            url: imgPath.startsWith('http') ? imgPath : `${API_BASE}${imgPath}`,
+          initialData.images.map((p) => ({
+            url: p.startsWith('http') ? p : `${API_BASE}${p}`,
             isExisting: true,
-            path: imgPath,
+            path: p,
           }))
         );
       }
     } else {
       if (brands.length > 0) setFormData((prev) => ({ ...prev, brand: prev.brand || brands[0]._id }));
-      if (categories.length > 0) setFormData((prev) => ({ ...prev, category: prev.category || categories[0]._id }));
     }
-  }, [initialData, brands, categories]);
+  }, [initialData, brands]);
 
   // ── Main image handlers ──────────────────────────────────────────────────────
   const handleFileChange = (e) => {
@@ -195,14 +179,11 @@ export default function ProductForm({ initialData = null, brands = [], categorie
     }));
   };
 
-  // ── Submit ───────────────────────────────────────────────────────────────────
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.brand || !formData.category) return;
+    if (!formData.name.trim() || !formData.brand) return;
 
     const formattedVariants = formData.variants.map((v) => {
-      // Strip temp _id strings (e.g. "var-temp-1") — Mongoose will generate a real ObjectId
-      // Keep real ObjectIds (24-char hex) so existing variants are preserved on update
       const isRealObjectId = /^[a-f\d]{24}$/i.test(v._id);
       const { _id, ...rest } = v;
       return {
@@ -215,29 +196,16 @@ export default function ProductForm({ initialData = null, brands = [], categorie
     });
 
     const fd = new FormData();
-    fd.append('name', formData.name.trim());
+    fd.append('name',        formData.name.trim());
     fd.append('description', formData.description.trim());
-    fd.append('brand', formData.brand);
-    fd.append('category', formData.category);
-    fd.append('isActive', formData.isActive);
-    fd.append('isFeatured', formData.isFeatured);
-    fd.append('variants', JSON.stringify(formattedVariants));
-    fd.append('colors', JSON.stringify(formData.colors));
-
-    if (imageFile) {
-      fd.append('mainImage', imageFile);
-    }
-
-    // Append each new gallery image
-    galleryFiles.forEach((file) => {
-      fd.append('productImages', file);
-    });
-
-    // Tell server which existing images to remove
-    if (removedImages.length > 0) {
-      fd.append('removeImages', JSON.stringify(removedImages));
-    }
-
+    fd.append('brand',       formData.brand);
+    fd.append('isActive',    formData.isActive);
+    fd.append('isFeatured',  formData.isFeatured);
+    fd.append('variants',    JSON.stringify(formattedVariants));
+    fd.append('colors',      JSON.stringify(formData.colors));
+    if (imageFile) fd.append('mainImage', imageFile);
+    galleryFiles.forEach((file) => fd.append('productImages', file));
+    if (removedImages.length > 0) fd.append('removeImages', JSON.stringify(removedImages));
     onSubmit(fd);
   };
 
@@ -259,43 +227,23 @@ export default function ProductForm({ initialData = null, brands = [], categorie
         />
       </div>
 
-      {/* Brand & Category Selectors */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-            <Tag size={13} className="text-[#c9a96e]" /> Brand <span className="text-rose-500">*</span>
-          </label>
-          <select
-            name="brand"
-            required
-            value={formData.brand}
-            onChange={handleChange}
-            className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 transition-all font-medium"
-          >
-            <option value="">Select Brand</option>
-            {brands.map((b) => (
-              <option key={b._id} value={b._id}>{b.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-            <Layers size={13} className="text-[#c9a96e]" /> Category <span className="text-rose-500">*</span>
-          </label>
-          <select
-            name="category"
-            required
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 transition-all font-medium"
-          >
-            <option value="">Select Category</option>
-            {categories.map((c) => (
-              <option key={c._id} value={c._id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
+      {/* Brand Selector only */}
+      <div>
+        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+          <Tag size={13} className="text-[#c9a96e]" /> Brand <span className="text-rose-500">*</span>
+        </label>
+        <select
+          name="brand"
+          required
+          value={formData.brand}
+          onChange={handleChange}
+          className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 transition-all font-medium"
+        >
+          <option value="">Select Brand</option>
+          {brands.map((b) => (
+            <option key={b._id} value={b._id}>{b.name}</option>
+          ))}
+        </select>
       </div>
 
       {/* Description */}

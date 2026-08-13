@@ -774,7 +774,7 @@ export default function Profile() {
                 <div className="flex flex-col items-center gap-3 py-14 text-center">
                   <Heart size={40} className="text-gray-200" />
                   <p className="text-sm text-gray-400 font-medium">Your wishlist is empty</p>
-                  <Link to="/women" className="mt-1 text-xs font-bold text-amber-700 hover:underline">
+                   <Link to="/shop" className="mt-1 text-xs font-bold text-amber-700 hover:underline">
                     Browse products →
                   </Link>
                 </div>

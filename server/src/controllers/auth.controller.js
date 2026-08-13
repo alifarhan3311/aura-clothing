@@ -19,7 +19,7 @@ const signToken = (id) =>
 
 const otpEmailHtml = (otp, purpose = "verification") => `
   <div style="font-family:sans-serif;max-width:480px;margin:auto">
-    <h2 style="color:#333">MH Clothing – OTP ${purpose}</h2>
+    <h2 style="color:#333">Fade Find – OTP ${purpose}</h2>
     <p>Your one-time password is:</p>
     <h1 style="letter-spacing:8px;color:#e44">${otp}</h1>
     <p>This OTP expires in <strong>${process.env.OTP_EXPIRES_MINUTES || 10} minutes</strong>.</p>
@@ -54,7 +54,7 @@ export const register = async (req, res) => {
 
     await sendMail(
       email,
-      "Verify your MH Clothing account",
+      "Verify your Fade Find account",
       otpEmailHtml(otp, "Verification")
     );
 
@@ -148,7 +148,7 @@ export const resendOTP = async (req, res) => {
 
     await sendMail(
       email,
-      "Resend – Verify your MH Clothing account",
+      "Resend – Verify your Fade Find account",
       otpEmailHtml(otp, "Verification")
     );
 
@@ -234,7 +234,7 @@ export const forgotPassword = async (req, res) => {
 
     await sendMail(
       email,
-      "MH Clothing – Reset your password",
+      "Fade Find – Reset your password",
       otpEmailHtml(otp, "Password Reset")
     );
 
@@ -272,7 +272,7 @@ export const resendForgotPasswordOTP = async (req, res) => {
 
     await sendMail(
       email,
-      "MH Clothing – Resend: Reset your password",
+      "Fade Find – Resend: Reset your password",
       otpEmailHtml(otp, "Password Reset")
     );
 

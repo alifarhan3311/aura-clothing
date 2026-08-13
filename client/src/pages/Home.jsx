@@ -5,20 +5,20 @@ import NewArrivals from '../components/home/NewArrivals';
 import TrendingNow from '../components/home/TrendingNow';
 import SaleBanner from '../components/home/SaleBanner';
 import FeaturedProducts from '../components/home/FeaturedProducts';
-import BlogPreview from '../components/home/BlogPreview';
+// import BlogPreview from '../components/home/BlogPreview';
 import Newsletter from '../components/home/Newsletter';
 
 export default function Home() {
   return (
     <main>
-      <title>MH Clothing — Premium Fashion Clothing Store</title>
+      <title>Fade Find — Premium Fashion Clothing Store</title>
       <Hero />
       <Categories />
       <NewArrivals />
-      <TrendingNow />
+      {/* <TrendingNow /> */}
       <SaleBanner />
       <FeaturedProducts />
-      <BlogPreview />
+      {/* <BlogPreview /> */}
       <Newsletter />
     </main>
   );

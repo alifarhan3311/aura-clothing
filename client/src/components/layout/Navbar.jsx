@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Heart, Search, User, Menu, X, ChevronDown, Loader2, LogOut, LayoutDashboard, MapPin } from 'lucide-react';
+import { ShoppingBag, Heart, Search, User, Menu, X, ChevronDown, LogOut, LayoutDashboard, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
@@ -38,68 +38,19 @@ function UserAvatar({ user, size = 8 }) {
 
 // Static links (no dropdown)
 const STATIC_LINKS = [
-  { label: 'About',   to: '/about' },
+  { label: 'About',   to: '/about'   },
   { label: 'Contact', to: '/contact' },
 ];
 
-// Sections to show as top-level nav items (maps to category.section)
 const NAV_SECTIONS = ['women', 'men', 'kids'];
 
 // ── Dropdown for a section ────────────────────────────────────────────────────
-function SectionDropdown({ section, categories, isOpen }) {
-  const navigate = useNavigate();
-  const filtered = categories.filter(
-    (c) => c.section?.toLowerCase() === section.toLowerCase()
-  );
-
-  if (!isOpen || filtered.length === 0) return null;
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 8 }}
-        transition={{ duration: 0.18 }}
-        className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-3 z-50 min-w-[220px]"
-      >
-        {/* Section page link */}
-        <Link
-          to={`/${section}`}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-900 uppercase tracking-widest transition-colors mb-1"
-        >
-          View All {section}
-        </Link>
-        <div className="border-t border-gray-100 my-1" />
-        {filtered.map((cat) => (
-          <button
-            key={cat._id}
-            onClick={() => navigate(`/category/${cat._id}`)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#f0e4cc]/50 transition-colors text-left group"
-          >
-            {cat.image && (
-              <img
-                src={resolveImg(cat.image)}
-                alt={cat.name}
-                className="w-8 h-8 rounded-lg object-cover border border-gray-100 shrink-0"
-              />
-            )}
-            <span className="text-sm font-semibold text-gray-800 group-hover:text-amber-800 transition-colors">
-              {cat.name}
-            </span>
-          </button>
-        ))}
-      </motion.div>
-    </AnimatePresence>
-  );
-}
 
 export default function Navbar() {
   const [scrolled, setScrolled]         = useState(false);
   const [mobileOpen, setMobileOpen]     = useState(false);
   const [searchOpen, setSearchOpen]     = useState(false);
   const [searchQuery, setSearchQuery]   = useState('');
-  const [openSection, setOpenSection]   = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [categories, setCategories]     = useState([]);
   const [catsLoading, setCatsLoading]   = useState(true);
@@ -108,7 +59,6 @@ export default function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const navigate      = useNavigate();
   const location      = useLocation();
-  const closeTimer    = useRef(null);
   const userMenuRef   = useRef(null);
 
   // ── Fetch all active categories once ─────────────────────────────────────────
@@ -132,7 +82,6 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
     setSearchOpen(false);
-    setOpenSection(null);
     setUserMenuOpen(false);
   }, [location]);
 
@@ -152,19 +101,10 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   // Hover open/close with slight delay
-  const handleMouseEnter = (section) => {
-    clearTimeout(closeTimer.current);
-    setOpenSection(section);
-  };
-
-  const handleMouseLeave = () => {
-    closeTimer.current = setTimeout(() => setOpenSection(null), 150);
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/women?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery('');
       setSearchOpen(false);
     }
@@ -206,94 +146,37 @@ export default function Navbar() {
                 className="text-2xl font-black tracking-[0.2em] text-gray-900 select-none"
                 style={{ fontFamily: 'Playfair Display, serif' }}
               >
-                MH
+                Fade Find
               </span>
             </Link>
 
             {/* ── Desktop nav ── */}
             <nav className="hidden md:flex items-center gap-1">
               {/* Home */}
-              <NavLink
-                to="/"
-                end
+              <NavLink to="/" end
                 className={({ isActive }) =>
-                  `px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${
-                    isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                  }`
-                }
-              >
-                Home
-              </NavLink>
+                  `px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+              >Home</NavLink>
 
-              {/* Section dropdowns */}
-              {NAV_SECTIONS.map((section) => {
-                const sectionCategories = categories.filter(
-                  (c) => c.section?.toLowerCase() === section
-                );
-                const hasCategories = sectionCategories.length > 0;
-
-                return (
-                  <div
-                    key={section}
-                    className="relative"
-                    onMouseEnter={() => handleMouseEnter(section)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    <button
-                      className={`flex items-center gap-1 px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg capitalize ${
-                        openSection === section
-                          ? 'text-gray-900 bg-gray-100'
-                          : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                      }`}
-                    >
-                      {section}
-                      {hasCategories && (
-                        <ChevronDown
-                          size={13}
-                          className={`transition-transform duration-200 ${openSection === section ? 'rotate-180' : ''}`}
-                        />
-                      )}
-                      {catsLoading && <Loader2 size={11} className="animate-spin opacity-50" />}
-                    </button>
-
-                    {hasCategories && (
-                      <SectionDropdown
-                        section={section}
-                        categories={categories}
-                        isOpen={openSection === section}
-                      />
-                    )}
-                  </div>
-                );
-              })}
+              {/* Shop */}
+              <NavLink to="/shop"
+                className={({ isActive }) =>
+                  `px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+              >Shop</NavLink>
 
               {/* Static links */}
               {STATIC_LINKS.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
+                <NavLink key={link.to} to={link.to}
                   className={({ isActive }) =>
-                    `px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${
-                      isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                    }`
-                  }
-                >
-                  {link.label}
-                </NavLink>
+                    `px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+                >{link.label}</NavLink>
               ))}
 
-              {/* Track Order */}
-              <NavLink
-                to="/track"
+              {/* Track */}
+              <NavLink to="/track"
                 className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${
-                    isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                  }`
-                }
-              >
-                <MapPin size={14} />
-                Track
-              </NavLink>
+                  `flex items-center gap-1.5 px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
+              ><MapPin size={14} />Track</NavLink>
             </nav>
 
             {/* Right icons */}
@@ -458,7 +341,7 @@ export default function Navbar() {
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
                 <span className="text-lg font-black tracking-[0.2em]" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  MH Clothing
+                  Fade Find
                 </span>
                 <button onClick={() => setMobileOpen(false)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100">
                   <X size={20} />
@@ -466,48 +349,40 @@ export default function Navbar() {
               </div>
 
               <nav className="flex-1 p-4 space-y-1">
-                <NavLink
-                  to="/"
-                  end
+                <NavLink to="/" end
                   className={({ isActive }) =>
-                    `block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`
-                  }
-                >
-                  Home
-                </NavLink>
+                    `block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
+                >Home</NavLink>
 
-                {/* Sections with their categories */}
+                <NavLink to="/shop"
+                  className={({ isActive }) =>
+                    `block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
+                >Shop</NavLink>
+
+                {/* Sections with categories */}
                 {NAV_SECTIONS.map((section) => {
                   const cats = groupedCategories[section] || [];
                   return (
                     <div key={section}>
-                      {/* Section header — links to section page */}
-                      <Link
-                        to={`/${section}`}
+                      <Link to={`/shop?section=${section}`}
                         className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 hover:bg-gray-50 capitalize transition-colors"
                       >
                         {section}
                         <span className="text-[10px] text-gray-400 font-normal">View all</span>
                       </Link>
-
-                      {/* Sub-categories */}
                       {cats.length > 0 && (
                         <div className="ml-3 pl-3 border-l border-gray-100 space-y-0.5 mb-1">
                           {cats.map((cat) => (
-                            <button
-                              key={cat._id}
-                              onClick={() => navigate(`/category/${cat._id}`)}
-                              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors text-left"
+                            <Link key={cat._id}
+                              to={`/shop?section=${section}&category=${cat._id}`}
+                              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                             >
                               {cat.image && (
-                                <img
-                                  src={resolveImg(cat.image)}
-                                  alt={cat.name}
-                                  className="w-6 h-6 rounded-md object-cover border border-gray-100 shrink-0"
-                                />
+                                <img src={resolveImg(cat.image)} alt={cat.name}
+                                  className="w-6 h-6 rounded-md object-cover border border-gray-100 shrink-0" />
                               )}
-                              {cat.name}
-                            </button>
+                              <span className="font-medium">{cat.name}</span>
+                            </Link>
                           ))}
                         </div>
                       )}
@@ -516,26 +391,17 @@ export default function Navbar() {
                 })}
 
                 {STATIC_LINKS.map((link) => (
-                  <NavLink
-                    key={link.to}
-                    to={link.to}
+                  <NavLink key={link.to} to={link.to}
                     className={({ isActive }) =>
-                      `block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`
-                    }
-                  >
-                    {link.label}
-                  </NavLink>
+                      `block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
+                  >{link.label}</NavLink>
                 ))}
 
-                {/* Track Order */}
-                <NavLink
-                  to="/track"
+                <NavLink to="/track"
                   className={({ isActive }) =>
-                    `flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`
-                  }
+                    `flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
                 >
-                  <MapPin size={16} className="text-amber-600" />
-                  Track Order
+                  <MapPin size={16} className="text-amber-600" />Track Order
                 </NavLink>
 
               </nav>

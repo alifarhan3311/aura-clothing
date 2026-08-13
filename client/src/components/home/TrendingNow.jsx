@@ -43,7 +43,7 @@ export default function TrendingNow() {
               Trending Now
             </h2>
           </div>
-          <Link to="/women" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700 hover:text-amber-700 transition-colors group">
+          <Link to="/shop" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700 hover:text-amber-700 transition-colors group">
             Shop All <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>

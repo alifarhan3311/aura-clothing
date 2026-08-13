@@ -42,7 +42,7 @@ export default function NewArrivals() {
             </h2>
           </div>
           <Link
-            to="/women"
+            to="/shop"
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700 hover:text-amber-700 transition-colors group"
           >
             View All <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
@@ -72,7 +72,7 @@ export default function NewArrivals() {
         )}
 
         <div className="sm:hidden text-center mt-6">
-          <Link to="/women" className="inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-3 rounded-full text-sm font-semibold">
+          <Link to="/shop" className="inline-flex items-center gap-2 bg-gray-900 text-white px-7 py-3 rounded-full text-sm font-semibold">
             View All New Arrivals <ArrowRight size={14} />
           </Link>
         </div>

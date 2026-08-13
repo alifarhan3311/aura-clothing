@@ -9,7 +9,7 @@ export default function Newsletter() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!email) return;
-    toast.success('Welcome to the MH Clothing family! 🎉', {
+    toast.success('Welcome to the Fade Find family! 🎉', {
       style: { fontFamily: 'Inter, sans-serif', fontSize: '14px', borderRadius: '8px', background: '#1a1a1a', color: '#fff' },
       iconTheme: { primary: '#c9a96e', secondary: '#fff' },
     });
@@ -31,7 +31,7 @@ export default function Newsletter() {
 
           <p className="text-xs font-semibold tracking-[0.35em] uppercase text-amber-400 mb-3">Stay in the Loop</p>
           <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Join the MH Clothing Circle
+            Join the Fade Find Circle
           </h2>
           <p className="text-gray-400 text-base mb-8 max-w-md mx-auto leading-relaxed">
             Subscribe to receive exclusive offers, early access to new drops, and style inspiration curated just for you.
