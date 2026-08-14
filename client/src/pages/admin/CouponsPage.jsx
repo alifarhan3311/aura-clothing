@@ -4,7 +4,7 @@ import AdminDetailView from '../../components/admin/AdminDetailView';
 import AdminFormModal from '../../components/admin/AdminFormModal';
 import CouponForm from '../../components/admin/forms/CouponForm';
 import { CheckCircle2, XCircle, Ticket } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { showSuccess, showError, showDelete } from '../../lib/toastUtils';
 import { couponApi } from '../../lib/api';
 
 export default function CouponsPage({ coupons, setCoupons, products = [] }) {
@@ -12,22 +12,21 @@ export default function CouponsPage({ coupons, setCoupons, products = [] }) {
   const [editingItem, setEditingItem] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  // Column definitions matching Coupon.js schema
   const columns = [
     {
       key: 'code',
       label: 'Coupon Code',
       sortable: true,
       render: (val) => (
-        <div className="flex items-center gap-1.5 font-mono font-bold text-gray-900 bg-amber-50 text-amber-900 px-2.5 py-1 rounded-lg border border-amber-200/60 w-fit">
-          <Ticket size={13} className="text-[#c9a96e]" />
+        <div className="flex items-center gap-1.5 font-mono font-bold text-amber-900 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200/60 w-fit">
+          <Ticket size={12} className="text-[#c9a96e]" />
           <span>{val}</span>
         </div>
       ),
     },
     {
       key: 'discountValue',
-      label: 'Discount Rate',
+      label: 'Discount',
       sortable: true,
       render: (val, row) => (
         <span className="font-bold text-gray-900">
@@ -46,8 +45,12 @@ export default function CouponsPage({ coupons, setCoupons, products = [] }) {
       label: 'Validity',
       sortable: true,
       render: (val, row) => {
-        const start = row.startDate ? new Date(row.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-        const end = val ? new Date(val).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        const start = row.startDate
+          ? new Date(row.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          : '';
+        const end = val
+          ? new Date(val).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : '';
         return <span className="text-gray-500 text-[11px] font-medium">{start} — {end}</span>;
       },
     },
@@ -72,25 +75,21 @@ export default function CouponsPage({ coupons, setCoupons, products = [] }) {
           </span>
         ) : (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-            <XCircle size={12} /> Expired / Inactive
+            <XCircle size={12} /> Inactive
           </span>
         ),
     },
   ];
 
-  // Actions with API integration
   const handleCreate = async (formData) => {
     try {
       const res = await couponApi.create(formData);
       const newCoupon = res.coupon || res.data || res;
       setCoupons([newCoupon, ...coupons]);
       setIsCreateOpen(false);
-      toast.success(`Coupon "${newCoupon.code || formData.code}" added successfully!`, {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess(`Coupon "${newCoupon.code || formData.code}" added successfully!`);
     } catch (error) {
-      toast.error(error.message || 'Failed to create coupon');
+      showError(error.message || 'Failed to create coupon');
     }
   };
 
@@ -100,26 +99,19 @@ export default function CouponsPage({ coupons, setCoupons, products = [] }) {
       const updated = res.coupon || res.data || { ...editingItem, ...formData };
       setCoupons((prev) => prev.map((c) => (c._id === editingItem._id ? updated : c)));
       setEditingItem(null);
-      toast.success('Coupon updated successfully!', {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess('Coupon updated successfully!');
     } catch (error) {
-      toast.error(error.message || 'Failed to update coupon');
+      showError(error.message || 'Failed to update coupon');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this coupon?')) {
-      try {
-        await couponApi.delete(id);
-        setCoupons((prev) => prev.filter((c) => c._id !== id));
-        toast.error('Coupon code deleted.', {
-          style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        });
-      } catch (error) {
-        toast.error(error.message || 'Failed to delete coupon');
-      }
+    try {
+      await couponApi.delete(id);
+      setCoupons((prev) => prev.filter((c) => c._id !== id));
+      showDelete('Coupon deleted.');
+    } catch (error) {
+      showError(error.message || 'Failed to delete coupon');
     }
   };
 
@@ -156,7 +148,6 @@ export default function CouponsPage({ coupons, setCoupons, products = [] }) {
         ]}
       />
 
-      {/* Detail View Modal */}
       <AdminDetailView
         isOpen={Boolean(detailItem)}
         onClose={() => setDetailItem(null)}
@@ -165,7 +156,6 @@ export default function CouponsPage({ coupons, setCoupons, products = [] }) {
         data={detailItem}
       />
 
-      {/* Create Modal */}
       <AdminFormModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -179,11 +169,10 @@ export default function CouponsPage({ coupons, setCoupons, products = [] }) {
         />
       </AdminFormModal>
 
-      {/* Edit Modal */}
       <AdminFormModal
         isOpen={Boolean(editingItem)}
         onClose={() => setEditingItem(null)}
-        title={`Edit Coupon Code: ${editingItem?.code}`}
+        title={`Edit Coupon: ${editingItem?.code}`}
         isEdit={true}
       >
         <CouponForm

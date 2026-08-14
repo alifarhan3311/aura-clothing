@@ -69,6 +69,18 @@ export const uploadAvatar = multer({
   limits: { fileSize: 3 * 1024 * 1024 }, // 3 MB
 });
 
+export const uploadSlide = multer({
+  storage: createStorage("slide"),
+  fileFilter: imageFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+});
+
+export const uploadDepartment = multer({
+  storage: createStorage("department"),
+  fileFilter: imageFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+});
+
 // ── Helper: delete a file from disk ──────────────────────────────────────────
 /**
  * Deletes a stored image given its public URL path

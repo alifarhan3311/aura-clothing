@@ -4,31 +4,31 @@ import AdminDetailView from '../../components/admin/AdminDetailView';
 import AdminFormModal from '../../components/admin/AdminFormModal';
 import ProductForm from '../../components/admin/forms/ProductForm';
 import { CheckCircle2, XCircle, Star } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { showSuccess, showError, showDelete } from '../../lib/toastUtils';
 import { productApi } from '../../lib/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export default function ProductsPage({ products, setProducts, brands = [] }) {
+export default function ProductsPage({ products, setProducts, brands = [], categories = [] }) {
   const [detailItem, setDetailItem] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  // Helper maps for Brand/Category names
-  const brandMap = React.useMemo(() => {
-    return brands.reduce((acc, b) => ({ ...acc, [b._id]: b.name }), {});
-  }, [brands]);
+  const brandMap = React.useMemo(
+    () => brands.reduce((acc, b) => ({ ...acc, [b._id]: b.name }), {}),
+    [brands]
+  );
 
-  const categoryMap = React.useMemo(() => {
-    return categories.reduce((acc, c) => ({ ...acc, [c._id]: c.name }), {});
-  }, [categories]);
+  const categoryMap = React.useMemo(
+    () => categories.reduce((acc, c) => ({ ...acc, [c._id]: c.name }), {}),
+    [categories]
+  );
 
-  // Column definitions matching Product.js schema
   const columns = [
     {
       key: 'mainImage',
       label: 'Product',
-      width: '90px',
+      width: '80px',
       sortable: false,
       render: (val, row) => {
         const src = val
@@ -76,7 +76,7 @@ export default function ProductsPage({ products, setProducts, brands = [] }) {
     },
     {
       key: 'price',
-      label: 'Price (Base)',
+      label: 'Base Price',
       sortable: true,
       render: (_, row) => {
         const basePrice = row.variants && row.variants[0] ? row.variants[0].price : 0;
@@ -85,12 +85,22 @@ export default function ProductsPage({ products, setProducts, brands = [] }) {
     },
     {
       key: 'stock',
-      label: 'Total Stock',
+      label: 'Stock',
       sortable: true,
       render: (_, row) => {
-        const totalStock = row.variants ? row.variants.reduce((acc, v) => acc + (v.stock || 0), 0) : 0;
+        const totalStock = row.variants
+          ? row.variants.reduce((acc, v) => acc + (v.stock || 0), 0)
+          : 0;
         return (
-          <span className={`font-bold ${totalStock > 5 ? 'text-emerald-700' : totalStock > 0 ? 'text-amber-700' : 'text-rose-600'}`}>
+          <span
+            className={`font-bold ${
+              totalStock > 5
+                ? 'text-emerald-700'
+                : totalStock > 0
+                ? 'text-amber-700'
+                : 'text-rose-600'
+            }`}
+          >
             {totalStock} pcs
           </span>
         );
@@ -121,19 +131,15 @@ export default function ProductsPage({ products, setProducts, brands = [] }) {
     },
   ];
 
-  // Actions with API integration
   const handleCreate = async (formData) => {
     try {
       const res = await productApi.create(formData);
       const newProduct = res.data || res.product || res;
       setProducts([newProduct, ...products]);
       setIsCreateOpen(false);
-      toast.success(`Product "${newProduct.name || formData.get?.('name')}" added!`, {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess(`Product "${newProduct.name || formData.get?.('name')}" added to inventory!`);
     } catch (error) {
-      toast.error(error.message || 'Failed to create product');
+      showError(error.message || 'Failed to create product');
     }
   };
 
@@ -141,30 +147,21 @@ export default function ProductsPage({ products, setProducts, brands = [] }) {
     try {
       const res = await productApi.update(editingItem._id, formData);
       const updated = res.data || res.product || { ...editingItem };
-      setProducts((prev) =>
-        prev.map((p) => (p._id === editingItem._id ? updated : p))
-      );
+      setProducts((prev) => prev.map((p) => (p._id === editingItem._id ? updated : p)));
       setEditingItem(null);
-      toast.success(`Product updated!`, {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess('Product updated successfully!');
     } catch (error) {
-      toast.error(error.message || 'Failed to update product');
+      showError(error.message || 'Failed to update product');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product listing?')) {
-      try {
-        await productApi.delete(id);
-        setProducts((prev) => prev.filter((p) => p._id !== id));
-        toast.error('Product deleted from inventory.', {
-          style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        });
-      } catch (error) {
-        toast.error(error.message || 'Failed to delete product');
-      }
+    try {
+      await productApi.delete(id);
+      setProducts((prev) => prev.filter((p) => p._id !== id));
+      showDelete('Product removed from inventory.');
+    } catch (error) {
+      showError(error.message || 'Failed to delete product');
     }
   };
 
@@ -201,7 +198,6 @@ export default function ProductsPage({ products, setProducts, brands = [] }) {
         ]}
       />
 
-      {/* Detail View Modal */}
       <AdminDetailView
         isOpen={Boolean(detailItem)}
         onClose={() => setDetailItem(null)}
@@ -210,7 +206,6 @@ export default function ProductsPage({ products, setProducts, brands = [] }) {
         data={detailItem}
       />
 
-      {/* Create Modal */}
       <AdminFormModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -224,7 +219,6 @@ export default function ProductsPage({ products, setProducts, brands = [] }) {
         />
       </AdminFormModal>
 
-      {/* Edit Modal */}
       <AdminFormModal
         isOpen={Boolean(editingItem)}
         onClose={() => setEditingItem(null)}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { showSuccess, showError } from '../lib/toastUtils';
 import { authApi } from '../lib/api';
 
 export default function Register() {
@@ -37,15 +37,12 @@ export default function Register() {
           password: form.password,
         });
 
-        toast.success('Account created! Check your email for the OTP.', {
-          style: { fontFamily: 'Inter, sans-serif', fontSize: '14px', borderRadius: '8px', background: '#1a1a1a', color: '#fff' },
-          iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-        });
+        showSuccess('Account created! Check your email for the OTP.');
 
         // Redirect to OTP verification page, passing email in state
         navigate('/verify-otp', { state: { email: form.email } });
       } catch (err) {
-        toast.error(err.message || 'Registration failed');
+        showError(err.message || 'Registration failed');
       } finally {
         setLoading(false);
       }

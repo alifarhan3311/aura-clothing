@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ShoppingBag, Heart, ChevronLeft, ChevronRight,
-  ArrowLeft, Tag, Layers, Package, Loader2, Share2, ZoomIn, X
+  ShoppingBag, Heart, ChevronLeft, ChevronRight, ChevronDown, ChevronUp,
+  ArrowLeft, Tag, Layers, Package, Loader2, Share2, ZoomIn, X, CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
@@ -10,6 +10,26 @@ import { useWishlist } from '../context/WishlistContext';
 import { productApi } from '../lib/api';
 import { normalizeProduct } from '../components/ui/ProductCard';
 import toast from 'react-hot-toast';
+
+// Color name → CSS hex mapping
+const COLOR_MAP = {
+  red: '#ef4444', blue: '#3b82f6', green: '#22c55e', yellow: '#eab308',
+  black: '#1a1a1a', white: '#f8f8f8', gray: '#9ca3af', grey: '#9ca3af',
+  pink: '#ec4899', purple: '#a855f7', orange: '#f97316', brown: '#92400e',
+  navy: '#1e3a5f', maroon: '#7f1d1d', beige: '#d4b483', cream: '#fdf8ee',
+  teal: '#14b8a6', cyan: '#06b6d4', gold: '#c9a96e', silver: '#94a3b8',
+  olive: '#65a30d', mint: '#6ee7b7', lavender: '#c4b5fd', coral: '#fb7185',
+  khaki: '#a3864b', rust: '#c2410c', rose: '#f43f5e', indigo: '#6366f1',
+  charcoal: '#374151', ivory: '#fffff0', mustard: '#d97706', peach: '#fca5a5',
+};
+function getColorHex(name) {
+  if (!name) return null;
+  const lower = name.toLowerCase().trim();
+  for (const [key, val] of Object.entries(COLOR_MAP)) {
+    if (lower.includes(key)) return val;
+  }
+  return null;
+}
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -21,7 +41,95 @@ function resolveImg(path) {
 const formatPrice = (p) =>
   new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 }).format(p);
 
+// ── Variants Accordion ────────────────────────────────────────────────────────
+function VariantsAccordion({ variants, selectedSize, selectedColor, onSelect, formatPrice }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mt-7 pt-6 border-t border-gray-100">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between mb-1 group"
+      >
+        <p className="text-[10px] font-black tracking-widest uppercase text-gray-400 group-hover:text-gray-600 transition-colors">
+          All Variants ({variants.length})
+        </p>
+        {open ? (
+          <ChevronUp size={14} className="text-gray-400" />
+        ) : (
+          <ChevronDown size={14} className="text-gray-400" />
+        )}
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="variants"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="overflow-hidden mt-3"
+          >
+            <div className="overflow-x-auto rounded-2xl border-2 border-gray-100">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-gray-50 border-b-2 border-gray-100">
+                  <tr>
+                    <th className="px-3 py-2.5 text-[10px] font-black text-gray-400 uppercase tracking-wider">Color</th>
+                    <th className="px-3 py-2.5 text-[10px] font-black text-gray-400 uppercase tracking-wider">Size</th>
+                    <th className="px-3 py-2.5 text-[10px] font-black text-gray-400 uppercase tracking-wider">Price</th>
+                    <th className="px-3 py-2.5 text-[10px] font-black text-gray-400 uppercase tracking-wider">Stock</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {variants.map((v, i) => {
+                    const isActive = selectedSize === v.size && selectedColor === v.color;
+                    const discPrice = v.discount > 0 ? Math.round(v.price * (1 - v.discount / 100)) : v.price;
+                    return (
+                      <tr
+                        key={v._id || i}
+                        onClick={() => onSelect(v.color, v.size)}
+                        className={`cursor-pointer transition-colors ${
+                          isActive ? 'bg-amber-50' : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        <td className="px-3 py-2.5">
+                          <span className={`font-semibold ${isActive ? 'text-amber-800' : 'text-gray-700'}`}>
+                            {v.color || '—'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span className={`inline-block px-2 py-0.5 rounded-lg text-[11px] font-bold ${
+                            isActive ? 'bg-amber-200 text-amber-900' : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {v.size || '—'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span className="font-black text-gray-900">{formatPrice(discPrice)}</span>
+                          {v.discount > 0 && (
+                            <span className="ml-1.5 text-[10px] text-rose-500 font-bold">-{v.discount}%</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span className={`font-bold ${v.stock > 5 ? 'text-emerald-600' : v.stock > 0 ? 'text-amber-600' : 'text-rose-500'}`}>
+                            {v.stock > 0 ? `${v.stock} pcs` : 'Out'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function ProductDetail() {
+
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
@@ -256,15 +364,15 @@ export default function ProductDetail() {
           {/* ── Product Info ── */}
           <div className="flex flex-col">
             {/* Brand / Category */}
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-2 flex-wrap mb-3">
               {product.brandName && (
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 uppercase tracking-widest">
-                  <Tag size={12} /> {product.brandName}
+                <span className="inline-flex items-center gap-1 text-[11px] font-black text-amber-700 uppercase tracking-widest bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">
+                  <Tag size={10} /> {product.brandName}
                 </span>
               )}
               {product.categoryName && (
-                <span className="inline-flex items-center gap-1 text-xs text-gray-400">
-                  <Layers size={12} /> {product.categoryName}
+                <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                  <Layers size={10} /> {product.categoryName}
                 </span>
               )}
             </div>
@@ -278,32 +386,39 @@ export default function ProductDetail() {
 
             {/* Type tags */}
             {raw.type?.length > 0 && (
-              <div className="flex gap-2 mb-4">
+              <div className="flex flex-wrap gap-2 mb-4">
                 {raw.type.map((t) => (
-                  <span key={t} className="text-[11px] font-semibold px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-full capitalize">{t}</span>
+                  <span key={t} className="text-[11px] font-bold px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full capitalize">{t}</span>
                 ))}
               </div>
             )}
 
             {/* Price */}
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-baseline gap-3 mb-5">
               <span className="text-3xl font-black text-gray-900">{formatPrice(displayPrice)}</span>
               {discount > 0 && (
                 <>
                   <span className="text-lg text-gray-400 line-through">{formatPrice(basePrice)}</span>
-                  <span className="text-sm font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">-{discount}%</span>
+                  <span className="text-sm font-black text-white bg-rose-500 px-2.5 py-0.5 rounded-full">-{discount}% OFF</span>
                 </>
               )}
             </div>
 
-            {/* Stock */}
+            {/* Stock badge */}
             <div className="mb-5">
               {stockLeft > 0 ? (
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${stockLeft <= 5 ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full ${
+                  stockLeft <= 5
+                    ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                    : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                }`}>
+                  <CheckCircle2 size={12} />
                   {stockLeft <= 5 ? `Only ${stockLeft} left!` : `${stockLeft} in stock`}
                 </span>
               ) : (
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-600">Out of Stock</span>
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100">
+                  <X size={12} /> Out of Stock
+                </span>
               )}
             </div>
 
@@ -312,28 +427,53 @@ export default function ProductDetail() {
               <p className="text-sm text-gray-600 leading-relaxed mb-6">{raw.description}</p>
             )}
 
-            <hr className="border-gray-100 mb-5" />
+            <div className="h-px bg-gray-100 mb-6" />
 
-            {/* Color */}
+            {/* Color — swatch dots */}
             {variantColors.length > 0 && (
-              <div className="mb-5">
-                <p className="text-xs font-bold tracking-widest uppercase text-gray-500 mb-2.5">
-                  Color — <span className="text-gray-900 font-semibold normal-case tracking-normal">{selectedColor}</span>
+              <div className="mb-6">
+                <p className="text-[10px] font-black tracking-widest uppercase text-gray-400 mb-3">
+                  Color — <span className="text-gray-800 font-bold normal-case tracking-normal text-xs">{selectedColor}</span>
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {variantColors.map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => setSelectedColor(c)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-semibold border-2 transition-all ${
-                        selectedColor === c
-                          ? 'border-gray-900 bg-gray-900 text-white'
-                          : 'border-gray-200 text-gray-600 hover:border-gray-400'
-                      }`}
-                    >
-                      {c}
-                    </button>
-                  ))}
+                  {variantColors.map((c) => {
+                    const hex = getColorHex(c);
+                    const isSelected = selectedColor === c;
+                    return hex ? (
+                      <button
+                        key={c}
+                        title={c}
+                        onClick={() => setSelectedColor(c)}
+                        className={`relative w-8 h-8 rounded-full transition-all ${
+                          isSelected ? 'ring-2 ring-offset-2 ring-gray-900 scale-110' : 'hover:scale-110'
+                        }`}
+                        style={{
+                          backgroundColor: hex,
+                          border: hex === '#f8f8f8' || hex === '#fdf8ee' || hex === '#fffff0' ? '1.5px solid #d0d0d0' : 'none',
+                        }}
+                      >
+                        {isSelected && (
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                              <path d="M1 4L3.5 6.5L9 1" stroke={hex === '#f8f8f8' || hex === '#fdf8ee' ? '#1a1a1a' : 'white'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </span>
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        key={c}
+                        onClick={() => setSelectedColor(c)}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
+                          isSelected
+                            ? 'border-gray-900 bg-gray-900 text-white'
+                            : 'border-gray-200 text-gray-600 hover:border-gray-400'
+                        }`}
+                      >
+                        {c}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -341,16 +481,16 @@ export default function ProductDetail() {
             {/* Size */}
             {sizes.length > 0 && (
               <div className="mb-6">
-                <p className="text-xs font-bold tracking-widest uppercase text-gray-500 mb-2.5">Size</p>
+                <p className="text-[10px] font-black tracking-widest uppercase text-gray-400 mb-3">Size</p>
                 <div className="flex flex-wrap gap-2">
                   {sizes.map((s) => (
                     <button
                       key={s}
                       onClick={() => setSelectedSize(s)}
-                      className={`w-12 h-12 rounded-xl text-sm font-semibold border-2 transition-all ${
+                      className={`min-w-[3rem] h-11 px-3 rounded-xl text-sm font-bold border-2 transition-all ${
                         selectedSize === s
-                          ? 'border-gray-900 bg-gray-900 text-white'
-                          : 'border-gray-200 text-gray-600 hover:border-gray-400'
+                          ? 'border-gray-900 bg-gray-900 text-white shadow-sm'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-400 bg-white'
                       }`}
                     >
                       {s}
@@ -362,26 +502,26 @@ export default function ProductDetail() {
 
             {/* Quantity */}
             <div className="mb-7">
-              <p className="text-xs font-bold tracking-widest uppercase text-gray-500 mb-2.5">Quantity</p>
-              <div className="flex items-center gap-3">
+              <p className="text-[10px] font-black tracking-widest uppercase text-gray-400 mb-3">Quantity</p>
+              <div className="inline-flex items-center gap-0 border-2 border-gray-200 rounded-2xl overflow-hidden">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-gray-400 transition-colors text-xl font-light"
+                  className="w-11 h-11 flex items-center justify-center hover:bg-gray-50 transition-colors text-lg font-light text-gray-600"
                 >−</button>
-                <span className="w-10 text-center font-bold text-lg">{quantity}</span>
+                <span className="w-12 text-center font-black text-base border-x-2 border-gray-200 h-11 flex items-center justify-center">{quantity}</span>
                 <button
                   onClick={() => setQuantity((q) => Math.min(q + 1, stockLeft || 99))}
-                  className="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-gray-400 transition-colors text-xl font-light"
+                  className="w-11 h-11 flex items-center justify-center hover:bg-gray-50 transition-colors text-lg font-light text-gray-600"
                 >+</button>
               </div>
             </div>
 
-            {/* CTA buttons */}
-            <div className="flex gap-3">
+            {/* CTA buttons — hidden on mobile (sticky bar handles it) */}
+            <div className="hidden sm:flex gap-3">
               <button
                 onClick={handleAdd}
                 disabled={stockLeft === 0}
-                className="flex-1 bg-gray-900 text-white py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#c9a96e] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                className="flex-1 bg-gray-900 text-white py-4 px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-amber-200"
               >
                 <ShoppingBag size={18} />
                 {stockLeft === 0 ? 'Out of Stock' : 'Add to Bag'}
@@ -389,73 +529,55 @@ export default function ProductDetail() {
               <button
                 onClick={() => toggleWishlist(product)}
                 className={`w-14 h-14 rounded-2xl border-2 flex items-center justify-center transition-all ${
-                  wishlisted ? 'border-rose-400 bg-rose-50' : 'border-gray-200 hover:border-gray-400'
+                  wishlisted ? 'border-rose-400 bg-rose-50' : 'border-gray-200 hover:border-rose-300'
                 }`}
               >
-                <Heart size={20} className={wishlisted ? 'fill-rose-400 text-rose-400' : 'text-gray-500'} />
+                <Heart size={20} className={wishlisted ? 'fill-rose-400 text-rose-400' : 'text-gray-400'} />
               </button>
               <button
                 onClick={handleShare}
-                className="w-14 h-14 rounded-2xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-400 transition-all text-gray-500"
+                className="w-14 h-14 rounded-2xl border-2 border-gray-200 flex items-center justify-center hover:border-gray-400 transition-all text-gray-400 hover:text-gray-700"
               >
                 <Share2 size={18} />
               </button>
             </div>
 
-            {/* Colors list (product-level) */}
-            {product.colors?.length > 0 && (
-              <div className="mt-6 pt-5 border-t border-gray-100">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Available Colors</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {product.colors.map((c) => (
-                    <span key={c} className="px-2.5 py-1 text-[11px] font-medium bg-[#f0e4cc]/60 text-amber-900 border border-[#c9a96e]/30 rounded-full">{c}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Variants table */}
+            {/* Variants — collapsible accordion */}
             {raw.variants?.length > 0 && (
-              <div className="mt-6 pt-5 border-t border-gray-100">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">All Variants</p>
-                <div className="overflow-x-auto rounded-xl border border-gray-200">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-gray-50 text-gray-500 font-semibold border-b border-gray-200">
-                      <tr>
-                        <th className="p-2.5">Color</th>
-                        <th className="p-2.5">Size</th>
-                        <th className="p-2.5">Price</th>
-                        <th className="p-2.5">Discount</th>
-                        <th className="p-2.5">Stock</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {raw.variants.map((v, i) => (
-                        <tr
-                          key={v._id || i}
-                          onClick={() => { setSelectedColor(v.color); setSelectedSize(v.size); }}
-                          className={`cursor-pointer hover:bg-gray-50 transition-colors ${
-                            selectedSize === v.size && selectedColor === v.color ? 'bg-[#f0e4cc]/40' : ''
-                          }`}
-                        >
-                          <td className="p-2.5 font-medium text-gray-900">{v.color}</td>
-                          <td className="p-2.5">{v.size}</td>
-                          <td className="p-2.5 font-semibold">{formatPrice(v.price)}</td>
-                          <td className="p-2.5 text-amber-700">{v.discount}%</td>
-                          <td className={`p-2.5 font-bold ${v.stock > 5 ? 'text-emerald-600' : v.stock > 0 ? 'text-amber-600' : 'text-rose-500'}`}>
-                            {v.stock} pcs
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              <VariantsAccordion
+                variants={raw.variants}
+                selectedSize={selectedSize}
+                selectedColor={selectedColor}
+                onSelect={(color, size) => { setSelectedColor(color); setSelectedSize(size); }}
+                formatPrice={formatPrice}
+              />
             )}
           </div>
         </div>
       </div>
     </main>
+
+    {/* ── Mobile Sticky CTA ── */}
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 shadow-2xl px-4 py-3 flex gap-3">
+      <button
+        onClick={() => toggleWishlist(product)}
+        className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center shrink-0 transition-all ${
+          wishlisted ? 'border-rose-400 bg-rose-50' : 'border-gray-200'
+        }`}
+      >
+        <Heart size={18} className={wishlisted ? 'fill-rose-400 text-rose-400' : 'text-gray-400'} />
+      </button>
+      <button
+        onClick={handleAdd}
+        disabled={stockLeft === 0}
+        className="flex-1 bg-gray-900 text-white py-3 rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-amber-600 disabled:opacity-50 transition-colors"
+      >
+        <ShoppingBag size={16} />
+        {stockLeft === 0 ? 'Out of Stock' : `Add to Bag — ${formatPrice(displayPrice)}`}
+      </button>
+    </div>
+    {/* Bottom spacer for mobile sticky bar */}
+    <div className="sm:hidden h-20" />
 
     {/* ── Lightbox ── */}
     <AnimatePresence>

@@ -4,7 +4,7 @@ import AdminDetailView from '../../components/admin/AdminDetailView';
 import AdminFormModal from '../../components/admin/AdminFormModal';
 import BrandForm from '../../components/admin/forms/BrandForm';
 import { CheckCircle2, XCircle } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { showSuccess, showError, showDelete } from '../../lib/toastUtils';
 import { brandApi } from '../../lib/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -14,7 +14,6 @@ export default function BrandsPage({ brands, setBrands }) {
   const [editingItem, setEditingItem] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  // Column definitions matching Brand.js schema
   const columns = [
     {
       key: 'logo',
@@ -63,7 +62,7 @@ export default function BrandsPage({ brands, setBrands }) {
     },
     {
       key: 'createdAt',
-      label: 'Created Date',
+      label: 'Created',
       sortable: true,
       render: (val) => (
         <span className="text-gray-400 text-[11px]">
@@ -73,19 +72,15 @@ export default function BrandsPage({ brands, setBrands }) {
     },
   ];
 
-  // Actions with API integration
   const handleCreate = async (formData) => {
     try {
       const res = await brandApi.create(formData);
       const newBrand = res.data || res.brand || res;
       setBrands([newBrand, ...brands]);
       setIsCreateOpen(false);
-      toast.success(`Brand "${newBrand.name || formData.get?.('name')}" saved!`, {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess(`Brand "${newBrand.name || formData.get?.('name')}" created successfully!`);
     } catch (error) {
-      toast.error(error.message || 'Failed to create brand');
+      showError(error.message || 'Failed to create brand');
     }
   };
 
@@ -93,30 +88,21 @@ export default function BrandsPage({ brands, setBrands }) {
     try {
       const res = await brandApi.update(editingItem._id, formData);
       const updated = res.data || res.brand || { ...editingItem };
-      setBrands((prev) =>
-        prev.map((b) => (b._id === editingItem._id ? updated : b))
-      );
+      setBrands((prev) => prev.map((b) => (b._id === editingItem._id ? updated : b)));
       setEditingItem(null);
-      toast.success(`Brand updated!`, {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess('Brand updated successfully!');
     } catch (error) {
-      toast.error(error.message || 'Failed to update brand');
+      showError(error.message || 'Failed to update brand');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this brand entry?')) {
-      try {
-        await brandApi.delete(id);
-        setBrands((prev) => prev.filter((b) => b._id !== id));
-        toast.error('Brand record deleted.', {
-          style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        });
-      } catch (error) {
-        toast.error(error.message || 'Failed to delete brand');
-      }
+    try {
+      await brandApi.delete(id);
+      setBrands((prev) => prev.filter((b) => b._id !== id));
+      showDelete('Brand deleted.');
+    } catch (error) {
+      showError(error.message || 'Failed to delete brand');
     }
   };
 
@@ -145,7 +131,6 @@ export default function BrandsPage({ brands, setBrands }) {
         ]}
       />
 
-      {/* Detail View Modal */}
       <AdminDetailView
         isOpen={Boolean(detailItem)}
         onClose={() => setDetailItem(null)}
@@ -154,7 +139,6 @@ export default function BrandsPage({ brands, setBrands }) {
         data={detailItem}
       />
 
-      {/* Create Modal */}
       <AdminFormModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -164,7 +148,6 @@ export default function BrandsPage({ brands, setBrands }) {
         <BrandForm onSubmit={handleCreate} onCancel={() => setIsCreateOpen(false)} />
       </AdminFormModal>
 
-      {/* Edit Modal */}
       <AdminFormModal
         isOpen={Boolean(editingItem)}
         onClose={() => setEditingItem(null)}

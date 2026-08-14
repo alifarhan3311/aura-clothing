@@ -21,12 +21,13 @@ import Footer from './components/layout/Footer';
 import Home          from './pages/Home';
 import Shop           from './pages/Shop';
 import ProductDetail from './pages/ProductDetail';
-import VerifyOtp     from './pages/VerifyOtp';
 import CategoryRedirect from './pages/CategoryRedirect';
 import About         from './pages/About';
 import Contact       from './pages/Contact';
 import Login         from './pages/Login';
 import Register      from './pages/Register';
+import VerifyOtp     from './pages/VerifyOtp';
+import ForgotPassword from './pages/ForgotPassword';
 import Cart          from './pages/Cart';
 import Checkout      from './pages/Checkout';
 import Profile       from './pages/Profile';
@@ -64,7 +65,7 @@ function AdminRoute({ children }) {
 function AppRoutes() {
   const location     = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
-  const hideFooter   = isAdminRoute || ['/login', '/register', '/verify-otp'].includes(location.pathname);
+  const hideFooter   = isAdminRoute || ['/login', '/register', '/verify-otp', '/forgot-password', '/reset-password'].includes(location.pathname);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -97,6 +98,8 @@ function AppRoutes() {
           <Route path="/login"    element={<PageWrapper><Login /></PageWrapper>} />
           <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
           <Route path="/verify-otp" element={<PageWrapper><VerifyOtp /></PageWrapper>} />
+          <Route path="/forgot-password" element={<PageWrapper><ForgotPassword /></PageWrapper>} />
+          <Route path="/reset-password"  element={<PageWrapper><ForgotPassword /></PageWrapper>} />
           <Route path="/cart"     element={<PageWrapper><Cart /></PageWrapper>} />
           <Route path="/checkout" element={<PageWrapper><Checkout /></PageWrapper>} />
           <Route path="/profile"  element={<PageWrapper><Profile /></PageWrapper>} />
@@ -125,7 +128,42 @@ export default function App() {
           <WishlistProvider>
             <Toaster
               position="bottom-right"
-              toastOptions={{ duration: 3000, style: { fontFamily: 'Inter, sans-serif' } }}
+              gutter={10}
+              containerStyle={{ zIndex: 99999, bottom: 24, right: 24 }}
+              toastOptions={{
+                duration: 3500,
+                style: {
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  background: '#111111',
+                  color: '#f5f5f5',
+                  borderRadius: '10px',
+                  padding: '12px 16px',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+                  maxWidth: '360px',
+                },
+                success: {
+                  iconTheme: { primary: '#c9a96e', secondary: '#111111' },
+                },
+                error: {
+                  duration: 4500,
+                  iconTheme: { primary: '#f87171', secondary: '#111111' },
+                  style: {
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    background: '#111111',
+                    color: '#f5f5f5',
+                    borderRadius: '10px',
+                    padding: '12px 16px',
+                    border: '1px solid rgba(248,113,113,0.25)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+                    maxWidth: '360px',
+                  },
+                },
+              }}
             />
             <AppRoutes />
           </WishlistProvider>

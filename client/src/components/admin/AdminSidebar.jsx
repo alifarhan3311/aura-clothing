@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Tag,
@@ -12,6 +12,8 @@ import {
   Sparkles,
   ChevronRight,
   AlertTriangle,
+  Sliders,
+  Store,
 } from 'lucide-react';
 
 export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
@@ -38,6 +40,11 @@ export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
       count: statsCounts.products,
     },
     {
+      name: 'Departments',
+      path: '/admin/departments',
+      icon: Layers,
+    },
+    {
       name: 'Categories',
       path: '/admin/categories',
       icon: Layers,
@@ -56,6 +63,11 @@ export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
       count: statsCounts.coupons,
     },
     {
+      name: 'Hero Slider',
+      path: '/admin/slides',
+      icon: Sliders,
+    },
+    {
       name: 'Users',
       path: '/admin/users',
       icon: Users,
@@ -69,18 +81,18 @@ export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
   };
 
   return (
-    <aside className="w-64 bg-gray-950 text-white flex flex-col h-full border-r border-gray-800 select-none">
+    <aside className="w-64 bg-gray-950 text-white flex flex-col h-full border-r border-white/5 select-none">
       {/* Brand logo & header */}
-      <div className="p-6 border-b border-gray-800/80 flex items-center justify-between">
+      <div className="px-5 py-5 border-b border-white/5">
         <NavLink to="/admin" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#c9a96e] to-[#f0e4cc] flex items-center justify-center text-gray-950 font-black shadow-md shadow-[#c9a96e]/20 group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#c9a96e] via-[#e0c08a] to-[#c9a96e] flex items-center justify-center text-gray-950 font-black text-sm shadow-lg shadow-[#c9a96e]/25 group-hover:shadow-[#c9a96e]/40 group-hover:scale-105 transition-all duration-200 shrink-0">
             MH
           </div>
-          <div>
-            <h1 className="font-serif font-bold text-lg text-white tracking-wide leading-tight group-hover:text-[#c9a96e] transition-colors">
+          <div className="leading-tight">
+            <h1 className="font-serif font-bold text-base text-white tracking-wide leading-none group-hover:text-[#c9a96e] transition-colors duration-200">
               Fade Find
             </h1>
-            <span className="text-[10px] font-bold text-[#c9a96e] uppercase tracking-widest block">
+            <span className="text-[10px] font-bold text-[#c9a96e]/70 uppercase tracking-[0.2em] block mt-0.5">
               Admin Portal
             </span>
           </div>
@@ -88,10 +100,10 @@ export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
       </div>
 
       {/* Navigation Links */}
-      <div className="flex-1 py-6 px-3 space-y-1.5 overflow-y-auto">
-        <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+      <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto scrollbar-none">
+        <p className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-600">
           Management
-        </div>
+        </p>
 
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -102,29 +114,29 @@ export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
               key={item.path}
               to={item.path}
               onClick={onCloseMobile}
-              className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
+              className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 group ${
                 isActive
-                  ? 'bg-[#c9a96e] text-gray-950 shadow-md shadow-[#c9a96e]/20'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-900/80'
+                  ? 'bg-[#c9a96e] text-gray-950 shadow-md shadow-[#c9a96e]/25'
+                  : 'text-gray-500 hover:text-white hover:bg-white/5'
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <Icon
-                  size={17}
-                  className={`transition-colors ${
-                    isActive ? 'text-gray-950' : 'text-gray-400 group-hover:text-[#c9a96e]'
+                  size={16}
+                  className={`shrink-0 transition-colors duration-150 ${
+                    isActive ? 'text-gray-950' : 'text-gray-600 group-hover:text-[#c9a96e]'
                   }`}
                 />
-                <span>{item.name}</span>
+                <span className="truncate">{item.name}</span>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 {item.count !== undefined && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold min-w-[20px] text-center ${
                       isActive
                         ? 'bg-gray-950/20 text-gray-950'
-                        : 'bg-gray-800 text-gray-300 group-hover:bg-gray-700'
+                        : 'bg-white/8 text-gray-500 group-hover:bg-white/10 group-hover:text-gray-300'
                     }`}
                   >
                     {item.count}
@@ -132,34 +144,38 @@ export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
                 )}
                 {/* Cancel request alert badge */}
                 {item.alertCount > 0 && (
-                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-orange-500 text-white animate-pulse">
-                    <AlertTriangle size={9} />
+                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-orange-500 text-white">
+                    <AlertTriangle size={8} />
                     {item.alertCount}
                   </span>
                 )}
-                {isActive && <ChevronRight size={13} className="text-gray-950" />}
+                {isActive && <ChevronRight size={12} className="text-gray-950 ml-0.5" />}
               </div>
             </NavLink>
           );
         })}
-      </div>
+      </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-800/80 space-y-3">
-        <div className="p-3 bg-gray-900/60 rounded-xl border border-gray-800 flex items-center gap-2.5">
-          <Sparkles size={16} className="text-[#c9a96e]" />
-          <div>
-            <p className="text-[11px] font-semibold text-gray-200">Live Backend Connected</p>
-            <p className="text-[10px] text-gray-500">localhost:5000 · MongoDB</p>
+      <div className="p-3 border-t border-white/5 space-y-2">
+        {/* Backend status */}
+        <div className="flex items-center gap-2.5 px-3 py-2.5 bg-white/3 rounded-xl border border-white/5">
+          <div className="relative shrink-0">
+            <div className="w-2 h-2 rounded-full bg-emerald-400" />
+            <div className="absolute inset-0 w-2 h-2 rounded-full bg-emerald-400 animate-ping opacity-40" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold text-gray-300 leading-none">Live Backend</p>
+            <p className="text-[10px] text-gray-600 mt-0.5 truncate">MongoDB · REST API</p>
           </div>
         </div>
 
         <NavLink
           to="/"
-          className="flex items-center justify-center gap-2 w-full py-2.5 px-3 bg-gray-900 text-gray-300 hover:text-white hover:bg-gray-800 rounded-xl text-xs font-semibold transition-all border border-gray-800"
+          className="flex items-center justify-center gap-2 w-full py-2.5 px-3 bg-white/4 text-gray-400 hover:text-white hover:bg-white/8 rounded-xl text-xs font-semibold transition-all border border-white/5 group"
         >
-          <ArrowLeft size={14} />
-          <span>Return to Store Front</span>
+          <Store size={13} className="group-hover:text-[#c9a96e] transition-colors" />
+          <span>Return to Storefront</span>
         </NavLink>
       </div>
     </aside>

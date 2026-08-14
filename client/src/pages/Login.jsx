@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { showSuccess, showError } from '../lib/toastUtils';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -31,10 +31,7 @@ export default function Login() {
       try {
         const res = await login(form.email, form.password);
 
-        toast.success('Welcome back to Fade Find! 👋', {
-          style: { fontFamily: 'Inter, sans-serif', fontSize: '14px', borderRadius: '8px', background: '#1a1a1a', color: '#fff' },
-          iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-        });
+        showSuccess('Welcome back to Fade Find! 👋');
 
         if (res.user?.role === 'admin') {
           navigate('/admin');
@@ -43,7 +40,7 @@ export default function Login() {
         }
         setForm({ email: '', password: '' });
       } catch (err) {
-        toast.error(err.message || 'Login failed');
+        showError(err.message || 'Login failed');
       } finally {
         setLoading(false);
       }
@@ -98,7 +95,7 @@ export default function Login() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-semibold text-gray-600">Password</label>
-                <a href="#" className="text-xs text-amber-700 hover:underline font-medium">Forgot password?</a>
+                <Link to="/forgot-password" className="text-xs text-amber-700 hover:underline font-medium">Forgot password?</Link>
               </div>
               <div className="relative">
                 <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />

@@ -4,7 +4,7 @@ import AdminDetailView from '../../components/admin/AdminDetailView';
 import AdminFormModal from '../../components/admin/AdminFormModal';
 import UserForm from '../../components/admin/forms/UserForm';
 import { ShieldCheck, UserCheck, UserX } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { showSuccess, showError, showDelete } from '../../lib/toastUtils';
 import { userApi } from '../../lib/api';
 
 export default function UsersPage({ users, setUsers }) {
@@ -12,7 +12,6 @@ export default function UsersPage({ users, setUsers }) {
   const [editingItem, setEditingItem] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  // Column definitions matching User.js schema
   const columns = [
     {
       key: 'avatar',
@@ -21,7 +20,10 @@ export default function UsersPage({ users, setUsers }) {
       sortable: false,
       render: (val, row) => (
         <img
-          src={val || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'}
+          src={
+            val ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(row.name || 'U')}&background=c9a96e&color=111&bold=true&size=80`
+          }
           alt={row.name}
           className="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-xs"
         />
@@ -29,7 +31,7 @@ export default function UsersPage({ users, setUsers }) {
     },
     {
       key: 'name',
-      label: 'User Name',
+      label: 'User',
       sortable: true,
       render: (val, row) => (
         <div>
@@ -55,7 +57,7 @@ export default function UsersPage({ users, setUsers }) {
     },
     {
       key: 'isVerified',
-      label: 'Verification',
+      label: 'Verified',
       sortable: true,
       render: (val) =>
         val ? (
@@ -76,7 +78,7 @@ export default function UsersPage({ users, setUsers }) {
     },
     {
       key: 'createdAt',
-      label: 'Joined Date',
+      label: 'Joined',
       sortable: true,
       render: (val) => (
         <span className="text-gray-400 text-[11px]">
@@ -86,19 +88,15 @@ export default function UsersPage({ users, setUsers }) {
     },
   ];
 
-  // Actions with API integration
   const handleCreate = async (formData) => {
     try {
       const res = await userApi.create(formData);
       const newUser = res.user || res.data || res;
       setUsers([newUser, ...users]);
       setIsCreateOpen(false);
-      toast.success(`User "${newUser.name || formData.name}" registered successfully!`, {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess(`User "${newUser.name || formData.name}" registered successfully!`);
     } catch (error) {
-      toast.error(error.message || 'Failed to create user');
+      showError(error.message || 'Failed to create user');
     }
   };
 
@@ -108,26 +106,19 @@ export default function UsersPage({ users, setUsers }) {
       const updated = res.user || res.data || { ...editingItem, ...formData };
       setUsers((prev) => prev.map((u) => (u._id === editingItem._id ? updated : u)));
       setEditingItem(null);
-      toast.success('User profile updated successfully!', {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess('User profile updated successfully!');
     } catch (error) {
-      toast.error(error.message || 'Failed to update user');
+      showError(error.message || 'Failed to update user');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to remove this user account?')) {
-      try {
-        await userApi.delete(id);
-        setUsers((prev) => prev.filter((u) => u._id !== id));
-        toast.error('User account deleted.', {
-          style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        });
-      } catch (error) {
-        toast.error(error.message || 'Failed to delete user');
-      }
+    try {
+      await userApi.delete(id);
+      setUsers((prev) => prev.filter((u) => u._id !== id));
+      showDelete('User account removed.');
+    } catch (error) {
+      showError(error.message || 'Failed to delete user');
     }
   };
 
@@ -135,7 +126,7 @@ export default function UsersPage({ users, setUsers }) {
     <div className="space-y-6">
       <AdminDataTable
         title="User Management"
-        subtitle="Manage customer accounts, admin roles, and account verification status"
+        subtitle="Manage customer accounts, admin roles, and verification status"
         columns={columns}
         data={users}
         onView={(row) => setDetailItem(row)}
@@ -164,7 +155,6 @@ export default function UsersPage({ users, setUsers }) {
         ]}
       />
 
-      {/* Detail View Modal */}
       <AdminDetailView
         isOpen={Boolean(detailItem)}
         onClose={() => setDetailItem(null)}
@@ -173,7 +163,6 @@ export default function UsersPage({ users, setUsers }) {
         data={detailItem}
       />
 
-      {/* Create Modal */}
       <AdminFormModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -183,7 +172,6 @@ export default function UsersPage({ users, setUsers }) {
         <UserForm onSubmit={handleCreate} onCancel={() => setIsCreateOpen(false)} />
       </AdminFormModal>
 
-      {/* Edit Modal */}
       <AdminFormModal
         isOpen={Boolean(editingItem)}
         onClose={() => setEditingItem(null)}

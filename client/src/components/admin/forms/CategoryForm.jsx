@@ -1,28 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, X, LayoutGrid } from 'lucide-react';
+import { Upload, X, LayoutGrid, Layers } from 'lucide-react';
+import { departmentApi } from '../../../lib/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const SECTIONS = [
-  { value: 'women', label: 'Women' },
-  { value: 'men',   label: 'Men'   },
-  { value: 'kids',  label: 'Kids'  },
-];
-
 export default function CategoryForm({ initialData = null, onSubmit, onCancel }) {
-  const [name,         setName]         = useState('');
-  const [description,  setDescription]  = useState('');
-  const [section,      setSection]      = useState('women');
-  const [isActive,     setIsActive]     = useState(true);
-  const [imageFile,    setImageFile]    = useState(null);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [section, setSection] = useState('women');
+  const [departmentId, setDepartmentId] = useState('');
+  const [isActive, setIsActive] = useState(true);
+  const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [departments, setDepartments] = useState([]);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    departmentApi
+      .getAll()
+      .then((res) => {
+        const depts = res.departments || [];
+        setDepartments(depts);
+        if (depts.length > 0 && !departmentId) {
+          setDepartmentId(depts[0]._id);
+          setSection(depts[0].slug);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (initialData) {
-      setName(initialData.name        || '');
+      setName(initialData.name || '');
       setDescription(initialData.description || '');
-      setSection(initialData.section  || 'women');
+      setSection(initialData.section || 'women');
+      setDepartmentId(initialData.department?._id || initialData.department || '');
       setIsActive(initialData.isActive !== undefined ? initialData.isActive : true);
       if (initialData.image) {
         const src = initialData.image.startsWith('http')
@@ -32,6 +44,15 @@ export default function CategoryForm({ initialData = null, onSubmit, onCancel })
       }
     }
   }, [initialData]);
+
+  const handleDepartmentChange = (e) => {
+    const selectedId = e.target.value;
+    setDepartmentId(selectedId);
+    const found = departments.find((d) => d._id === selectedId);
+    if (found) {
+      setSection(found.slug);
+    }
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -50,17 +71,19 @@ export default function CategoryForm({ initialData = null, onSubmit, onCancel })
     e.preventDefault();
     if (!name.trim()) return;
     const fd = new FormData();
-    fd.append('name',        name.trim());
+    fd.append('name', name.trim());
     fd.append('description', description.trim());
-    fd.append('section',     section);
-    fd.append('isActive',    String(isActive));
+    fd.append('section', section);
+    if (departmentId) {
+      fd.append('department', departmentId);
+    }
+    fd.append('isActive', String(isActive));
     if (imageFile) fd.append('image', imageFile);
     onSubmit(fd);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-
       {/* Category Name */}
       <div>
         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
@@ -71,30 +94,41 @@ export default function CategoryForm({ initialData = null, onSubmit, onCancel })
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Women Western"
-          className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 focus:border-[#c9a96e] transition-all"
+          placeholder="e.g. Women Western, Baby Suits, Young Boys Jackets"
+          className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 focus:border-[#c9a96e] transition-all font-bold text-gray-900"
         />
       </div>
 
-      {/* Catalog Section */}
+      {/* Top Department / Section Layer */}
       <div>
-        <div className="flex items-center gap-1 mb-1.5">
-          <LayoutGrid size={13} className="text-[#c9a96e]" />
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <Layers size={14} className="text-[#c9a96e]" />
           <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Catalog Section <span className="text-rose-500">*</span>
+            Parent Department / Section <span className="text-rose-500">*</span>
           </span>
         </div>
-        <select
-          value={section}
-          onChange={(e) => setSection(e.target.value)}
-          className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 focus:border-[#c9a96e] transition-all font-medium"
-        >
-          {SECTIONS.map((s) => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-        </select>
+        {departments.length > 0 ? (
+          <select
+            value={departmentId}
+            onChange={handleDepartmentChange}
+            className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 focus:border-[#c9a96e] transition-all font-bold text-gray-900"
+          >
+            {departments.map((dept) => (
+              <option key={dept._id} value={dept._id}>
+                {dept.icon || '✨'} {dept.name} ({dept.subtitle || `/${dept.slug}`})
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type="text"
+            value={section}
+            onChange={(e) => setSection(e.target.value)}
+            className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl"
+          />
+        )}
         <p className="text-[10px] text-gray-400 mt-1">
-          Controls which navbar section this category appears under (/women, /men, /kids)
+          Select which top-level department (Women, Men, Kids, Babies, Young Boys, etc.) this category belongs to.
         </p>
       </div>
 

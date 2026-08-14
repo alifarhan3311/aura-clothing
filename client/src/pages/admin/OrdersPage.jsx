@@ -6,7 +6,7 @@ import {
   ExternalLink, Loader2, RefreshCw, MapPin, Phone,
   Mail, Tag, CreditCard, Banknote, Filter, CheckCheck, X,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { showSuccess, showError, showInfo } from '../../lib/toastUtils';
 import { orderApi } from '../../lib/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -75,12 +75,9 @@ function OrderDetailDrawer({ order, onClose, onStatusChange }) {
     try {
       const res = await orderApi.approveCancelRequest(order._id, 'Cancellation approved by admin.');
       onStatusChange(res.order || { ...order, status: 'cancelled' });
-      toast.success('Cancellation approved. Order cancelled.', {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess('Cancellation approved. Order cancelled.');
     } catch (err) {
-      toast.error(err.message || 'Failed to approve cancellation');
+      showError(err.message || 'Failed to approve cancellation');
     } finally {
       setProcessingCancel(false);
     }
@@ -88,20 +85,17 @@ function OrderDetailDrawer({ order, onClose, onStatusChange }) {
 
   const handleRejectCancelRequest = async () => {
     if (!rejectNote.trim()) {
-      toast.error('Please provide a reason for rejecting the cancellation request.');
+      showError('Please provide a reason for rejecting the cancellation request.');
       return;
     }
     setProcessingCancel(true);
     try {
       const res = await orderApi.rejectCancelRequest(order._id, rejectNote.trim());
       onStatusChange(res.order || { ...order, status: res.order?.status || 'confirmed' });
-      toast.success('Cancellation request rejected. Order restored.', {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess('Cancellation request rejected. Order restored.');
       setRejectNote('');
     } catch (err) {
-      toast.error(err.message || 'Failed to reject cancellation');
+      showError(err.message || 'Failed to reject cancellation');
     } finally {
       setProcessingCancel(false);
     }
@@ -113,13 +107,10 @@ function OrderDetailDrawer({ order, onClose, onStatusChange }) {
     try {
       const res = await orderApi.updateStatus(order._id, selectedStatus, note.trim());
       onStatusChange(res.order || { ...order, status: selectedStatus });
-      toast.success(`Order status → "${STATUS[selectedStatus]?.label}"`, {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess(`Order status updated → "${STATUS[selectedStatus]?.label}"`);
       setNote('');
     } catch (err) {
-      toast.error(err.message || 'Failed to update status');
+      showError(err.message || 'Failed to update status');
     } finally {
       setUpdating(false);
     }
@@ -452,7 +443,7 @@ export default function OrdersPage() {
       setTotal(res.total || 0);
       setPage(pg);
     } catch (err) {
-      toast.error('Failed to load orders');
+      showError('Failed to load orders');
     } finally {
       setLoading(false);
       setRefreshing(false);

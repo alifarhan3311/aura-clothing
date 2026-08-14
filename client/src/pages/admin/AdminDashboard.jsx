@@ -7,6 +7,8 @@ import CouponsPage from './CouponsPage';
 import ProductsPage from './ProductsPage';
 import UsersPage from './UsersPage';
 import OrdersPage from './OrdersPage';
+import HeroSlidesPage from './HeroSlidesPage';
+import DepartmentsPage from './DepartmentsPage';
 import { brandApi, categoryApi, productApi, userApi, couponApi, orderApi } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -60,27 +62,31 @@ function DashboardOverview({ brands, categories, products, coupons, users, order
 
   const stats = [
     {
-      title: 'Total Orders',
+      title: 'Orders',
       value: orders.length,
-      subtext: `${pendingOrders} pending review`,
+      subtext: `${pendingOrders} pending`,
       icon: ShoppingCart,
-      color: 'bg-amber-50 text-amber-700 border-amber-200',
+      iconBg: 'bg-amber-50',
+      iconColor: 'text-amber-600',
       link: '/admin/orders',
+      alert: pendingOrders > 0,
     },
     {
-      title: 'Total Products',
+      title: 'Products',
       value: products.length,
-      subtext: `${totalStock} units in stock`,
+      subtext: `${totalStock} in stock`,
       icon: Package,
-      color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      iconBg: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
       link: '/admin/products',
     },
     {
-      title: 'Active Brands',
+      title: 'Brands',
       value: brands.length,
-      subtext: `${brands.filter((b) => b.isActive).length} active lines`,
+      subtext: `${brands.filter((b) => b.isActive).length} active`,
       icon: Tag,
-      color: 'bg-[#f0e4cc] text-gray-900 border-[#c9a96e]/30',
+      iconBg: 'bg-[#f0e4cc]',
+      iconColor: 'text-[#b07d3a]',
       link: '/admin/brands',
     },
     {
@@ -88,221 +94,220 @@ function DashboardOverview({ brands, categories, products, coupons, users, order
       value: categories.length,
       subtext: 'Men · Women · Kids',
       icon: Layers,
-      color: 'bg-blue-50 text-blue-700 border-blue-200',
+      iconBg: 'bg-blue-50',
+      iconColor: 'text-blue-600',
       link: '/admin/categories',
     },
     {
-      title: 'Active Coupons',
+      title: 'Coupons',
       value: activeCoupons,
-      subtext: `${coupons.length - activeCoupons} expired/draft`,
+      subtext: `${coupons.length} total`,
       icon: Ticket,
-      color: 'bg-purple-50 text-purple-700 border-purple-200',
+      iconBg: 'bg-purple-50',
+      iconColor: 'text-purple-600',
       link: '/admin/coupons',
     },
     {
-      title: 'Total Users',
+      title: 'Users',
       value: users.length,
       subtext: `${users.filter((u) => u.role === 'admin').length} admins`,
       icon: Users,
-      color: 'bg-rose-50 text-rose-700 border-rose-200',
+      iconBg: 'bg-rose-50',
+      iconColor: 'text-rose-600',
       link: '/admin/users',
     },
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Banner */}
+    <div className="space-y-6">
+      {/* Welcome Banner */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl bg-gray-950 p-6 sm:p-8 text-white shadow-xl border border-gray-800"
+        className="relative overflow-hidden rounded-2xl bg-gray-950 px-6 py-6 sm:px-8 sm:py-7 text-white shadow-lg"
       >
-        <div className="relative z-10 max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#c9a96e]/20 text-[#c9a96e] border border-[#c9a96e]/30 text-xs font-semibold">
-            <Sparkles size={14} /> Admin Management Hub
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#c9a96e]/15 text-[#c9a96e] border border-[#c9a96e]/25 text-[11px] font-bold tracking-wider uppercase">
+              <Sparkles size={11} /> Admin Hub
+            </div>
+            <h2 className="text-xl sm:text-2xl font-serif font-bold tracking-tight text-white">
+              Welcome back{users.length > 0 ? '' : ''}
+            </h2>
+            <p className="text-xs text-gray-400 leading-relaxed max-w-md">
+              Full control over orders, products, brands, categories, coupons, and users.
+            </p>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight">
-            Welcome back
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
-            Manage orders, products, brands, categories, coupons and users — all connected to the live backend.
-          </p>
-          {/* Revenue quick stat */}
-          <div className="flex items-center gap-2 pt-1">
-            <TrendingUp size={15} className="text-[#c9a96e]" />
-            <span className="text-sm font-bold text-white">
-              {new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 }).format(totalRevenue)}
-            </span>
-            <span className="text-xs text-gray-400">total revenue (non-cancelled)</span>
+
+          {/* Revenue stat */}
+          <div className="shrink-0 flex items-center gap-3 bg-white/5 border border-white/8 rounded-xl px-4 py-3">
+            <TrendingUp size={18} className="text-[#c9a96e]" />
+            <div>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Revenue</p>
+              <p className="text-base font-black text-white">
+                {new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 }).format(totalRevenue)}
+              </p>
+              <p className="text-[10px] text-gray-500">non-cancelled orders</p>
+            </div>
           </div>
         </div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#c9a96e]/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+
+        {/* Decorative blob */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#c9a96e]/8 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16" />
       </motion.div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* Alert Banners */}
+      {(pendingOrders > 0 || cancelRequestOrders > 0) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {pendingOrders > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={() => navigate('/admin/orders')}
+              className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 cursor-pointer hover:bg-amber-100 transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                <Clock size={14} className="text-amber-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-amber-900">{pendingOrders} Pending Order{pendingOrders > 1 ? 's' : ''}</p>
+                <p className="text-[10px] text-amber-700">Awaiting your review</p>
+              </div>
+              <ArrowRight size={14} className="text-amber-500 group-hover:translate-x-1 transition-transform shrink-0" />
+            </motion.div>
+          )}
+          {cancelRequestOrders > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={() => navigate('/admin/orders')}
+              className="flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 cursor-pointer hover:bg-orange-100 transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+                <AlertTriangle size={14} className="text-orange-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-orange-900">{cancelRequestOrders} Cancel Request{cancelRequestOrders > 1 ? 's' : ''}</p>
+                <p className="text-[10px] text-orange-700">Awaiting approval or rejection</p>
+              </div>
+              <ArrowRight size={14} className="text-orange-500 group-hover:translate-x-1 transition-transform shrink-0" />
+            </motion.div>
+          )}
+        </div>
+      )}
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
         {loading
-          ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32" />)
+          ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-28" />)
           : stats.map((stat, idx) => {
               const Icon = stat.icon;
               return (
                 <motion.div
                   key={stat.title}
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
                   onClick={() => navigate(stat.link)}
-                  className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+                  className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-tight">
-                        {stat.title}
-                      </span>
-                      <div className={`p-2 rounded-xl border ${stat.color} transition-transform group-hover:scale-110`}>
-                        <Icon size={15} />
-                      </div>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`p-2 rounded-xl ${stat.iconBg} group-hover:scale-110 transition-transform duration-200`}>
+                      <Icon size={15} className={stat.iconColor} />
                     </div>
-                    <div className="text-2xl font-black text-gray-900 tracking-tight">{stat.value}</div>
+                    {stat.alert && (
+                      <span className="w-2 h-2 rounded-full bg-amber-500 mt-1 shrink-0" />
+                    )}
                   </div>
-                  <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between text-[10px]">
-                    <span className="text-gray-400 font-medium">{stat.subtext}</span>
-                    <ArrowRight size={12} className="text-gray-400 group-hover:text-[#c9a96e] group-hover:translate-x-1 transition-all" />
+                  <div className="text-2xl font-black text-gray-900 tracking-tight">{stat.value}</div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{stat.title}</span>
+                    <span className="text-[10px] text-gray-400">{stat.subtext}</span>
                   </div>
                 </motion.div>
               );
             })}
       </div>
 
-      {/* Lower grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
+      {/* Lower Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Recent Orders */}
-        <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/40">
             <div>
-              <h3 className="font-bold text-gray-900 text-base">Recent Orders</h3>
-              <p className="text-xs text-gray-500">Latest orders from customers</p>
+              <h3 className="font-bold text-gray-900 text-sm">Recent Orders</h3>
+              <p className="text-[11px] text-gray-500 mt-0.5">Latest customer transactions</p>
             </div>
             <button
               onClick={() => navigate('/admin/orders')}
-              className="text-xs font-bold text-[#c9a96e] hover:text-amber-800 flex items-center gap-1 hover:underline"
+              className="text-xs font-bold text-[#c9a96e] hover:text-amber-800 flex items-center gap-1 transition-colors"
             >
-              View All <ArrowRight size={13} />
+              View All <ArrowRight size={12} />
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="divide-y divide-gray-50">
             {loading
-              ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16" />)
-              : orders.slice(0, 5).map((order) => (
+              ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-14 m-4" />)
+              : orders.length === 0 ? (
+                <div className="py-12 text-center">
+                  <ShoppingCart size={24} className="text-gray-200 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">No orders yet.</p>
+                </div>
+              ) : (
+                orders.slice(0, 6).map((order) => (
                   <div
                     key={order._id}
                     onClick={() => navigate('/admin/orders')}
-                    className="p-3 bg-gray-50/70 hover:bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between gap-4 cursor-pointer transition-colors"
+                    className="px-5 py-3 hover:bg-gray-50 flex items-center justify-between gap-4 cursor-pointer transition-colors group"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
-                        <ShoppingCart size={14} className="text-amber-600" />
+                      <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+                        <ShoppingCart size={12} className="text-amber-600" />
                       </div>
                       <div className="min-w-0">
                         <p className="font-bold text-xs text-gray-900 truncate">
                           {order.shippingInfo?.firstName} {order.shippingInfo?.lastName}
                         </p>
-                        <p className="text-[10px] text-gray-400 truncate font-mono">{order._id}</p>
+                        <p className="text-[10px] text-gray-400 font-mono truncate">{order._id}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-2.5 shrink-0">
                       <span className="text-xs font-bold text-gray-900">
                         {new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 }).format(order.total)}
                       </span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border capitalize ${ORDER_STATUS_COLORS[order.status] || ORDER_STATUS_COLORS.pending}`}>
-                        {order.status}
+                        {order.status?.replace('_', ' ')}
                       </span>
                     </div>
                   </div>
-                ))}
-            {!loading && orders.length === 0 && (
-              <div className="text-center py-8">
-                <ShoppingCart size={28} className="text-gray-200 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">No orders yet.</p>
-              </div>
-            )}
+                ))
+              )}
           </div>
         </div>
 
-        {/* Right column: Pending + Schema */}
-        <div className="space-y-6">
-
-          {/* Pending orders alert */}
-          {pendingOrders > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              onClick={() => navigate('/admin/orders')}
-              className="bg-amber-50 border border-amber-200 rounded-2xl p-5 cursor-pointer hover:bg-amber-100 transition-colors"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center">
-                  <Clock size={16} className="text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-amber-900">{pendingOrders} Pending Order{pendingOrders > 1 ? 's' : ''}</p>
-                  <p className="text-xs text-amber-700">Awaiting your review</p>
-                </div>
-              </div>
-              <button className="text-xs font-bold text-amber-800 hover:underline flex items-center gap-1">
-                Review now <ArrowRight size={12} />
-              </button>
-            </motion.div>
-          )}
-
-          {/* Cancel requests alert */}
-          {cancelRequestOrders > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              onClick={() => navigate('/admin/orders')}
-              className="bg-orange-50 border border-orange-300 rounded-2xl p-5 cursor-pointer hover:bg-orange-100 transition-colors"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center">
-                  <AlertTriangle size={16} className="text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-orange-900">{cancelRequestOrders} Cancel Request{cancelRequestOrders > 1 ? 's' : ''}</p>
-                  <p className="text-xs text-orange-700">Awaiting approval or rejection</p>
+        {/* Schema Status */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/40">
+            <h3 className="font-bold text-gray-900 text-sm">Schema Status</h3>
+            <p className="text-[11px] text-gray-500 mt-0.5">Mongoose models · server/src/models</p>
+          </div>
+          <div className="p-4 space-y-2">
+            {[
+              { name: 'Order.js',    fields: 'items, status, tracking, coupon' },
+              { name: 'Product.js',  fields: 'name, brand, category, variants[]' },
+              { name: 'Category.js', fields: 'name, section (men/women/kids)' },
+              { name: 'Coupon.js',   fields: 'code, discountType, products[]' },
+              { name: 'User.js',     fields: 'name, email, role, avatar' },
+            ].map((model) => (
+              <div key={model.name} className="flex items-start gap-2.5 p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                <CheckCircle2 size={13} className="text-[#c9a96e] shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <span className="font-bold text-gray-900 font-mono text-[11px] block">{model.name}</span>
+                  <p className="text-[10px] text-gray-500 mt-0.5 truncate">{model.fields}</p>
                 </div>
               </div>
-              <button className="text-xs font-bold text-orange-800 hover:underline flex items-center gap-1">
-                Review now <ArrowRight size={12} />
-              </button>
-            </motion.div>
-          )}
-
-          {/* Schema Status */}
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
-            <div className="border-b border-gray-100 pb-3">
-              <h3 className="font-bold text-gray-900 text-sm">Schema Status</h3>
-              <p className="text-xs text-gray-500">Mongoose models · server/src/models</p>
-            </div>
-            <div className="space-y-2.5 text-xs">
-              {[
-                { name: 'Order.js',    fields: 'items, status, tracking, coupon, history' },
-                { name: 'Product.js',  fields: 'name, brand, category, variants[]' },
-                { name: 'Category.js', fields: 'name, section (men/women/kids)' },
-                { name: 'Coupon.js',   fields: 'code, discountType, products[]' },
-                { name: 'User.js',     fields: 'name, email, role, avatar' },
-              ].map((model) => (
-                <div key={model.name} className="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-start gap-2">
-                  <CheckCircle2 size={14} className="text-[#c9a96e] shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-gray-900 font-mono text-[11px]">{model.name}</span>
-                    <p className="text-[10px] text-gray-500 mt-0.5">{model.fields}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </div>
@@ -373,12 +378,14 @@ export default function AdminDashboard() {
   }, [token, authLoading]);
 
   const getActiveTitle = () => {
-    if (location.pathname.includes('/orders'))     return 'Orders';
-    if (location.pathname.includes('/brands'))     return 'Brands';
-    if (location.pathname.includes('/categories')) return 'Categories';
-    if (location.pathname.includes('/coupons'))    return 'Coupons';
-    if (location.pathname.includes('/products'))   return 'Products';
-    if (location.pathname.includes('/users'))      return 'Users';
+    if (location.pathname.includes('/orders'))      return 'Orders';
+    if (location.pathname.includes('/departments')) return 'Departments';
+    if (location.pathname.includes('/brands'))      return 'Brands';
+    if (location.pathname.includes('/categories'))  return 'Categories';
+    if (location.pathname.includes('/coupons'))     return 'Coupons';
+    if (location.pathname.includes('/products'))    return 'Products';
+    if (location.pathname.includes('/slides'))      return 'Hero Slides';
+    if (location.pathname.includes('/users'))       return 'Users';
     return 'Overview';
   };
 
@@ -423,9 +430,12 @@ export default function AdminDashboard() {
               products={products}
               setProducts={setProducts}
               brands={brands}
+              categories={categories}
             />
           }
         />
+        <Route path="departments" element={<DepartmentsPage />} />
+        <Route path="slides" element={<HeroSlidesPage />} />
         <Route path="users" element={<UsersPage users={users} setUsers={setUsers} />} />
       </Routes>
     </AdminLayout>

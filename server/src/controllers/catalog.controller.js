@@ -1,8 +1,19 @@
 import Category from "../models/Category.js";
 import Product from "../models/Product.js";
+import Department from "../models/Department.js";
 
-// ── Allowed top-level catalog sections ───────────────────────────────────────
-const VALID_SECTIONS = ["women", "men", "kids"];
+// Helper to resolve department by slug or ID
+async function resolveDepartment(secParam) {
+  const lower = secParam.toLowerCase();
+  const isObjectId = /^[a-f\d]{24}$/i.test(secParam);
+  let dept = null;
+  if (isObjectId) {
+    dept = await Department.findById(secParam);
+  } else {
+    dept = await Department.findOne({ slug: lower });
+  }
+  return dept;
+}
 
 // ── Helper: build price range query from variants ─────────────────────────────
 function buildPriceQuery(minPrice, maxPrice) {
@@ -43,14 +54,10 @@ function parseList(param) {
 export const getCatalogBySection = async (req, res) => {
   try {
     const { section } = req.params;
+    const lowerSec = section.toLowerCase();
 
-    // Validate section
-    if (!VALID_SECTIONS.includes(section.toLowerCase())) {
-      return res.status(400).json({
-        success: false,
-        message: `Invalid section. Must be one of: ${VALID_SECTIONS.join(", ")}`,
-      });
-    }
+    // Check if department exists in DB or fallback
+    const dept = await resolveDepartment(section);
 
     const {
       page = 1,
@@ -67,13 +74,19 @@ export const getCatalogBySection = async (req, res) => {
       search,
     } = req.query;
 
-    // ── 1. Resolve category IDs for this section ──────────────────────────────
-    // Find all active categories that belong to this section
-    const sectionCategoryQuery = { section: section.toLowerCase(), isActive: true };
+    // ── 1. Resolve category IDs for this section / department ────────────────
+    const sectionCategoryQuery = { isActive: true };
+    if (dept) {
+      sectionCategoryQuery.$or = [
+        { department: dept._id },
+        { section: dept.slug },
+      ];
+    } else {
+      sectionCategoryQuery.section = lowerSec;
+    }
 
     // If a specific sub-category is requested, narrow further
     if (categoryParam) {
-      // Support both slug ("dresses") and ObjectId ("64abc...")
       const isObjectId = /^[a-f\d]{24}$/i.test(categoryParam);
       if (isObjectId) {
         sectionCategoryQuery._id = categoryParam;
@@ -82,7 +95,7 @@ export const getCatalogBySection = async (req, res) => {
       }
     }
 
-    const sectionCategories = await Category.find(sectionCategoryQuery).select("_id name slug image");
+    const sectionCategories = await Category.find(sectionCategoryQuery).select("_id name slug image section department");
 
     const categoryIds = sectionCategories.map((c) => c._id);
 

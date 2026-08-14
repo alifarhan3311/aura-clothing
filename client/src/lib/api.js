@@ -121,6 +121,7 @@ export const authApi = {
   getMe: () => api.get("/auth/me"),
   updateProfile: (formData) => api.upload("/auth/update-profile", formData, "PUT"),
   forgotPassword: (data) => api.post("/auth/forgot-password", data),
+  resendForgotPasswordOTP: (data) => api.post("/auth/resend-forgot-password-otp", data),
   updatePassword: (data) => api.post("/auth/update-password", data),
 };
 
@@ -288,6 +289,47 @@ export const orderApi = {
   track: (trackingNumber) => api.get(`/orders/track/${trackingNumber}`),
   // Get last checkout session from Redis
   getCheckoutSession: () => api.get("/orders/checkout-session"),
+};
+
+// ── Hero Slide / Banner Service ─────────────────────────────────────────────
+export const slideApi = {
+  getActive: () => api.get("/slides"),
+  getAllAdmin: () => api.get("/slides/admin"),
+  create: (formDataOrJson) => {
+    if (formDataOrJson instanceof FormData) {
+      return api.upload("/slides", formDataOrJson, "POST");
+    }
+    return api.post("/slides", formDataOrJson);
+  },
+  update: (id, formDataOrJson) => {
+    if (formDataOrJson instanceof FormData) {
+      return api.upload(`/slides/${id}`, formDataOrJson, "PUT");
+    }
+    return api.put(`/slides/${id}`, formDataOrJson);
+  },
+  updateStatus: (id, isActive) => api.patch(`/slides/${id}/status`, { isActive }),
+  delete: (id) => api.delete(`/slides/${id}`),
+};
+
+// ── Department / Section Service ─────────────────────────────────────────────
+export const departmentApi = {
+  getAll: () => api.get("/departments"),
+  getAllAdmin: () => api.get("/departments/admin/all"),
+  getByIdOrSlug: (idOrSlug) => api.get(`/departments/${idOrSlug}`),
+  create: (formDataOrJson) => {
+    if (formDataOrJson instanceof FormData) {
+      return api.upload("/departments", formDataOrJson, "POST");
+    }
+    return api.post("/departments", formDataOrJson);
+  },
+  update: (id, formDataOrJson) => {
+    if (formDataOrJson instanceof FormData) {
+      return api.upload(`/departments/${id}`, formDataOrJson, "PUT");
+    }
+    return api.put(`/departments/${id}`, formDataOrJson);
+  },
+  updateStatus: (id, isActive) => api.patch(`/departments/${id}/status`, { isActive }),
+  delete: (id) => api.delete(`/departments/${id}`),
 };
 
 export default api;

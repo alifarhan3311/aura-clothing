@@ -4,7 +4,7 @@ import AdminDetailView from '../../components/admin/AdminDetailView';
 import AdminFormModal from '../../components/admin/AdminFormModal';
 import CategoryForm from '../../components/admin/forms/CategoryForm';
 import { CheckCircle2, XCircle } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { showSuccess, showError, showDelete } from '../../lib/toastUtils';
 import { categoryApi } from '../../lib/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -14,7 +14,6 @@ export default function CategoriesPage({ categories, setCategories }) {
   const [editingItem, setEditingItem] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  // Column definitions matching Category.js schema
   const columns = [
     {
       key: 'image',
@@ -81,7 +80,7 @@ export default function CategoriesPage({ categories, setCategories }) {
     },
     {
       key: 'createdAt',
-      label: 'Created Date',
+      label: 'Created',
       sortable: true,
       render: (val) => (
         <span className="text-gray-400 text-[11px]">
@@ -91,19 +90,15 @@ export default function CategoriesPage({ categories, setCategories }) {
     },
   ];
 
-  // Actions with API integration
   const handleCreate = async (formData) => {
     try {
       const res = await categoryApi.create(formData);
       const newCategory = res.data || res.category || res;
       setCategories([newCategory, ...categories]);
       setIsCreateOpen(false);
-      toast.success(`Category "${newCategory.name || formData.get?.('name')}" saved!`, {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess(`Category "${newCategory.name || formData.get?.('name')}" created successfully!`);
     } catch (error) {
-      toast.error(error.message || 'Failed to create category');
+      showError(error.message || 'Failed to create category');
     }
   };
 
@@ -111,30 +106,21 @@ export default function CategoriesPage({ categories, setCategories }) {
     try {
       const res = await categoryApi.update(editingItem._id, formData);
       const updated = res.data || res.category || { ...editingItem };
-      setCategories((prev) =>
-        prev.map((c) => (c._id === editingItem._id ? updated : c))
-      );
+      setCategories((prev) => prev.map((c) => (c._id === editingItem._id ? updated : c)));
       setEditingItem(null);
-      toast.success(`Category updated!`, {
-        style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess('Category updated successfully!');
     } catch (error) {
-      toast.error(error.message || 'Failed to update category');
+      showError(error.message || 'Failed to update category');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
-      try {
-        await categoryApi.delete(id);
-        setCategories((prev) => prev.filter((c) => c._id !== id));
-        toast.error('Category entry deleted.', {
-          style: { background: '#1a1a1a', color: '#fff', borderRadius: '8px', fontSize: '13px' },
-        });
-      } catch (error) {
-        toast.error(error.message || 'Failed to delete category');
-      }
+    try {
+      await categoryApi.delete(id);
+      setCategories((prev) => prev.filter((c) => c._id !== id));
+      showDelete('Category deleted.');
+    } catch (error) {
+      showError(error.message || 'Failed to delete category');
     }
   };
 
@@ -172,7 +158,6 @@ export default function CategoriesPage({ categories, setCategories }) {
         ]}
       />
 
-      {/* Detail View Modal */}
       <AdminDetailView
         isOpen={Boolean(detailItem)}
         onClose={() => setDetailItem(null)}
@@ -181,7 +166,6 @@ export default function CategoriesPage({ categories, setCategories }) {
         data={detailItem}
       />
 
-      {/* Create Modal */}
       <AdminFormModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -191,7 +175,6 @@ export default function CategoriesPage({ categories, setCategories }) {
         <CategoryForm onSubmit={handleCreate} onCancel={() => setIsCreateOpen(false)} />
       </AdminFormModal>
 
-      {/* Edit Modal */}
       <AdminFormModal
         isOpen={Boolean(editingItem)}
         onClose={() => setEditingItem(null)}

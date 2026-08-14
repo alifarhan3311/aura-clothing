@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Heart, Search, User, Menu, X, ChevronDown, LogOut, LayoutDashboard, MapPin } from 'lucide-react';
+import {
+  ShoppingBag, Heart, Search, User, Menu, X, ChevronDown,
+  LogOut, LayoutDashboard, MapPin, Sparkles
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
-import { categoryApi } from '../../lib/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -13,7 +15,7 @@ function resolveImg(path) {
   return path.startsWith('http') ? path : `${API_BASE}${path}`;
 }
 
-// ── User Avatar (initials fallback) ──────────────────────────────────────────
+// ── User Avatar ───────────────────────────────────────────────────────────────
 function UserAvatar({ user, size = 8 }) {
   const dim = `w-${size} h-${size}`;
   const initials = user?.name
@@ -30,48 +32,32 @@ function UserAvatar({ user, size = 8 }) {
     );
   }
   return (
-    <div className={`${dim} rounded-full bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center text-white font-bold text-[11px] border-2 border-white shadow-sm`}>
+    <div className={`${dim} rounded-full bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center text-white font-black text-[11px] border-2 border-white shadow-sm`}>
       {initials}
     </div>
   );
 }
 
-// Static links (no dropdown)
-const STATIC_LINKS = [
-  { label: 'About',   to: '/about'   },
+const NAV_LINKS = [
+  { label: 'Home',    to: '/', end: true },
+  { label: 'Shop',    to: '/shop' },
+  { label: 'About',   to: '/about' },
   { label: 'Contact', to: '/contact' },
+  { label: 'Track Order', to: '/track', icon: MapPin },
 ];
 
-const NAV_SECTIONS = ['women', 'men', 'kids'];
-
-// ── Dropdown for a section ────────────────────────────────────────────────────
-
 export default function Navbar() {
-  const [scrolled, setScrolled]         = useState(false);
-  const [mobileOpen, setMobileOpen]     = useState(false);
-  const [searchOpen, setSearchOpen]     = useState(false);
-  const [searchQuery, setSearchQuery]   = useState('');
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [categories, setCategories]     = useState([]);
-  const [catsLoading, setCatsLoading]   = useState(true);
 
   const { cartCount } = useCart();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
-  const navigate      = useNavigate();
-  const location      = useLocation();
-  const userMenuRef   = useRef(null);
-
-  // ── Fetch all active categories once ─────────────────────────────────────────
-  useEffect(() => {
-    categoryApi
-      .getAll({ limit: 100 })
-      .then((res) => {
-        const data = res.categories || res.data || res;
-        setCategories(Array.isArray(data) ? data : []);
-      })
-      .catch(() => setCategories([]))
-      .finally(() => setCatsLoading(false));
-  }, []);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -100,29 +86,22 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  // Hover open/close with slight delay
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`)
+      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
       setSearchOpen(false);
     }
   };
-
-  // Mobile: categories grouped by section
-  const groupedCategories = NAV_SECTIONS.reduce((acc, sec) => {
-    acc[sec] = categories.filter((c) => c.section?.toLowerCase() === sec);
-    return acc;
-  }, {});
 
   return (
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           scrolled
-            ? 'bg-white/98 backdrop-blur-md shadow-sm border-b border-gray-100'
-            : 'bg-white/90 backdrop-blur-sm'
+            ? 'bg-white/98 backdrop-blur-md shadow-md border-b border-gray-100'
+            : 'bg-white/92 backdrop-blur-sm'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -152,35 +131,31 @@ export default function Navbar() {
 
             {/* ── Desktop nav ── */}
             <nav className="hidden md:flex items-center gap-1">
-              {/* Home */}
-              <NavLink to="/" end
-                className={({ isActive }) =>
-                  `px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
-              >Home</NavLink>
-
-              {/* Shop */}
-              <NavLink to="/shop"
-                className={({ isActive }) =>
-                  `px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
-              >Shop</NavLink>
-
-              {/* Static links */}
-              {STATIC_LINKS.map((link) => (
-                <NavLink key={link.to} to={link.to}
-                  className={({ isActive }) =>
-                    `px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
-                >{link.label}</NavLink>
-              ))}
-
-              {/* Track */}
-              <NavLink to="/track"
-                className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-2 text-sm font-medium tracking-wide transition-colors rounded-lg ${isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}
-              ><MapPin size={14} />Track</NavLink>
+              {NAV_LINKS.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    end={link.end}
+                    className={({ isActive }) =>
+                      `flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold tracking-wide transition-colors rounded-xl ${
+                        isActive
+                          ? 'text-gray-900 bg-gray-100'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      }`
+                    }
+                  >
+                    {Icon && <Icon size={14} className="text-amber-600" />}
+                    {link.label}
+                  </NavLink>
+                );
+              })}
             </nav>
 
-            {/* Right icons */}
+            {/* ── Right icons ── */}
             <div className="flex items-center gap-1">
+              {/* Search */}
               <button
                 onClick={() => setSearchOpen((s) => !s)}
                 className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
@@ -189,13 +164,12 @@ export default function Navbar() {
                 <Search size={18} className="text-gray-700" />
               </button>
 
-              {/* User icon / avatar */}
+              {/* User */}
               {isAuthenticated ? (
                 <div className="hidden md:block relative" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen((s) => !s)}
                     className="flex items-center gap-1.5 px-1.5 py-1 rounded-full hover:bg-gray-100 transition-colors"
-                    aria-label="Account menu"
                   >
                     <UserAvatar user={user} size={8} />
                     <ChevronDown
@@ -207,51 +181,45 @@ export default function Navbar() {
                   <AnimatePresence>
                     {userMenuOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
-                        transition={{ duration: 0.16 }}
-                        className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50"
+                        initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 overflow-hidden"
                       >
                         {/* User info */}
-                        <div className="px-4 py-2.5 border-b border-gray-100">
-                          <p className="text-xs font-bold text-gray-900 truncate">{user?.name}</p>
-                          <p className="text-[10px] text-gray-400 truncate">{user?.email}</p>
+                        <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                          <div className="flex items-center gap-3">
+                            <UserAvatar user={user} size={9} />
+                            <div className="min-w-0">
+                              <p className="text-xs font-black text-gray-900 truncate">{user?.name}</p>
+                              <p className="text-[10px] text-gray-400 truncate">{user?.email}</p>
+                            </div>
+                          </div>
                         </div>
 
-                        <Link
-                          to="/profile"
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          <User size={14} className="text-gray-400" />
-                          My Profile
+                        <Link to="/profile" className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                          <User size={14} className="text-gray-400" /> My Profile
                         </Link>
-
-                        <Link
-                          to="/track"
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          <MapPin size={14} className="text-gray-400" />
-                          Track Order
+                        <Link to="/track" className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                          <MapPin size={14} className="text-gray-400" /> Track Order
                         </Link>
 
                         {isAdmin && (
-                          <Link
-                            to="/admin"
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-amber-700 hover:bg-amber-50 transition-colors"
-                          >
+                          <Link to="/admin" className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-bold text-amber-700 hover:bg-amber-50 transition-colors">
                             <LayoutDashboard size={14} className="text-amber-500" />
-                            Admin Panel
+                            <span className="flex items-center gap-1.5">
+                              Admin Panel <Sparkles size={10} className="text-amber-400" />
+                            </span>
                           </Link>
                         )}
 
                         <div className="border-t border-gray-100 mt-1 pt-1">
                           <button
                             onClick={() => { logout(); navigate('/'); }}
-                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors"
+                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors"
                           >
-                            <LogOut size={14} />
-                            Sign Out
+                            <LogOut size={14} /> Sign Out
                           </button>
                         </div>
                       </motion.div>
@@ -262,28 +230,31 @@ export default function Navbar() {
                 <Link
                   to="/login"
                   className="hidden md:flex w-9 h-9 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                  aria-label="Login"
                 >
                   <User size={18} className="text-gray-700" />
                 </Link>
               )}
 
+              {/* Cart */}
               <Link
                 to="/cart"
                 className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
                 aria-label={`Cart (${cartCount} items)`}
               >
                 <ShoppingBag size={18} className="text-gray-700" />
-                {cartCount > 0 && (
-                  <motion.span
-                    key={cartCount}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-gray-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5"
-                  >
-                    {cartCount}
-                  </motion.span>
-                )}
+                <AnimatePresence>
+                  {cartCount > 0 && (
+                    <motion.span
+                      key={cartCount}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-gray-900 text-white text-[10px] font-black rounded-full flex items-center justify-center px-0.5"
+                    >
+                      {cartCount}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </Link>
             </div>
           </div>
@@ -305,11 +276,11 @@ export default function Navbar() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search products, categories…"
-                    className="flex-1 bg-gray-50 rounded-xl px-4 py-2.5 text-sm outline-none border border-gray-200 focus:border-[#c9a96e] transition-colors"
+                    className="flex-1 bg-gray-50 rounded-xl px-4 py-2.5 text-sm outline-none border border-gray-200 focus:border-amber-400 transition-colors"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl hover:bg-[#c9a96e] transition-colors"
+                    className="px-5 py-2 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-amber-600 transition-colors"
                   >
                     Search
                   </button>
@@ -320,12 +291,12 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* ── Mobile drawer ── */}
+      {/* ── Mobile Drawer ── */}
       <AnimatePresence>
         {mobileOpen && (
           <>
             <motion.div
-              className="fixed inset-0 bg-black/40 z-50 md:hidden"
+              className="fixed inset-0 bg-black/50 z-50 md:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -336,7 +307,7 @@ export default function Navbar() {
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 280 }}
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
@@ -349,99 +320,53 @@ export default function Navbar() {
               </div>
 
               <nav className="flex-1 p-4 space-y-1">
-                <NavLink to="/" end
-                  className={({ isActive }) =>
-                    `block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
-                >Home</NavLink>
-
-                <NavLink to="/shop"
-                  className={({ isActive }) =>
-                    `block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
-                >Shop</NavLink>
-
-                {/* Sections with categories */}
-                {NAV_SECTIONS.map((section) => {
-                  const cats = groupedCategories[section] || [];
-                  return (
-                    <div key={section}>
-                      <Link to={`/shop?section=${section}`}
-                        className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 hover:bg-gray-50 capitalize transition-colors"
-                      >
-                        {section}
-                        <span className="text-[10px] text-gray-400 font-normal">View all</span>
-                      </Link>
-                      {cats.length > 0 && (
-                        <div className="ml-3 pl-3 border-l border-gray-100 space-y-0.5 mb-1">
-                          {cats.map((cat) => (
-                            <Link key={cat._id}
-                              to={`/shop?section=${section}&category=${cat._id}`}
-                              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                            >
-                              {cat.image && (
-                                <img src={resolveImg(cat.image)} alt={cat.name}
-                                  className="w-6 h-6 rounded-md object-cover border border-gray-100 shrink-0" />
-                              )}
-                              <span className="font-medium">{cat.name}</span>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {STATIC_LINKS.map((link) => (
-                  <NavLink key={link.to} to={link.to}
+                {NAV_LINKS.map((link) => (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    end={link.end}
                     className={({ isActive }) =>
-                      `block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
-                  >{link.label}</NavLink>
+                      `block px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+                        isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'
+                      }`
+                    }
+                  >
+                    {link.label}
+                  </NavLink>
                 ))}
-
-                <NavLink to="/track"
-                  className={({ isActive }) =>
-                    `flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
-                >
-                  <MapPin size={16} className="text-amber-600" />Track Order
-                </NavLink>
-
               </nav>
 
               <div className="p-4 border-t border-gray-100 space-y-2">
                 {isAuthenticated ? (
                   <>
-                    <Link
-                      to="/profile"
-                      className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50"
-                    >
+                    <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl mb-2">
+                      <UserAvatar user={user} size={10} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-gray-900 truncate">{user?.name}</p>
+                        <p className="text-[10px] text-gray-400 truncate">{user?.email}</p>
+                      </div>
+                    </div>
+                    <Link to="/profile" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
                       <User size={18} /> My Profile
                     </Link>
                     {isAdmin && (
-                      <Link
-                        to="/admin"
-                        className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold text-amber-700 hover:bg-amber-50"
-                      >
+                      <Link to="/admin" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold text-amber-700 hover:bg-amber-50">
                         <LayoutDashboard size={18} className="text-amber-500" /> Admin Portal
                       </Link>
                     )}
                     <button
                       onClick={() => { logout(); navigate('/'); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50"
                     >
                       <LogOut size={18} /> Sign Out
                     </button>
                   </>
                 ) : (
-                  <Link
-                    to="/login"
-                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
+                  <Link to="/login" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-amber-600 transition-colors justify-center">
                     <User size={18} /> Login / Register
                   </Link>
                 )}
-                <Link
-                  to="/cart"
-                  className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
+                <Link to="/cart" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
                   <ShoppingBag size={18} /> Cart {cartCount > 0 && `(${cartCount})`}
                 </Link>
               </div>

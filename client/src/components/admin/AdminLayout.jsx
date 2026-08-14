@@ -7,7 +7,7 @@ export default function AdminLayout({ children, activeTitle = 'Dashboard', stats
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex font-sans antialiased text-gray-900">
+    <div className="min-h-screen bg-[#f8f8f9] flex font-sans antialiased text-gray-900">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block fixed inset-y-0 left-0 z-30 w-64">
         <AdminSidebar statsCounts={statsCounts} />
@@ -22,16 +22,17 @@ export default function AdminLayout({ children, activeTitle = 'Dashboard', stats
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               onClick={() => setMobileSidebarOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+              className="fixed inset-0 bg-gray-950/70 backdrop-blur-sm"
             />
             {/* Drawer */}
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ duration: 0.25, ease: 'easeInOut' }}
-              className="relative z-10 w-64 h-full"
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-10 w-64 h-full shadow-2xl"
             >
               <AdminSidebar statsCounts={statsCounts} onCloseMobile={() => setMobileSidebarOpen(false)} />
             </motion.div>
@@ -45,7 +46,7 @@ export default function AdminLayout({ children, activeTitle = 'Dashboard', stats
           activeTitle={activeTitle}
           onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
         />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto space-y-6">
           {children}
         </main>
       </div>

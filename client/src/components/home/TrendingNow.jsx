@@ -9,8 +9,14 @@ function SkeletonCard() {
   return (
     <div className="animate-pulse">
       <div className="bg-gray-100 rounded-2xl aspect-[3/4] mb-3" />
+      <div className="h-2 bg-gray-100 rounded w-1/3 mb-2" />
       <div className="h-3.5 bg-gray-100 rounded w-3/4 mb-2" />
-      <div className="h-3 bg-gray-100 rounded w-1/2" />
+      <div className="flex gap-1 mb-2">
+        <div className="w-4 h-4 bg-gray-100 rounded-full" />
+        <div className="w-4 h-4 bg-gray-100 rounded-full" />
+        <div className="w-4 h-4 bg-gray-100 rounded-full" />
+      </div>
+      <div className="h-4 bg-gray-100 rounded w-1/2" />
     </div>
   );
 }
@@ -35,16 +41,18 @@ export default function TrendingNow() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp size={14} className="text-amber-700" />
-              <p className="text-xs font-semibold tracking-[0.35em] uppercase text-amber-700">Most Loved</p>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="inline-flex items-center gap-1.5 bg-rose-50 text-rose-600 text-[11px] font-black px-3 py-1.5 rounded-full border border-rose-100">
+                <TrendingUp size={10} /> Most Loved
+              </span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900" style={{ fontFamily: 'Playfair Display, serif' }}>
               Trending Now
             </h2>
+            <p className="text-sm text-gray-400 mt-2">What everyone's wearing right now</p>
           </div>
-          <Link to="/shop" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700 hover:text-amber-700 transition-colors group">
-            Shop All <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+          <Link to="/shop" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-gray-700 hover:text-amber-700 transition-colors group bg-gray-50 px-4 py-2.5 rounded-full border border-gray-200 hover:border-amber-200">
+            Shop All <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 

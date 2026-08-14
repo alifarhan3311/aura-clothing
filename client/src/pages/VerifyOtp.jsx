@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ShieldCheck, RefreshCw, KeyRound, Mail, ArrowLeft } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { showSuccess, showError } from '../lib/toastUtils';
 import { authApi } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -90,25 +90,22 @@ export default function VerifyOtp() {
     e.preventDefault();
     const fullOtp = otp.join('');
     if (fullOtp.length !== 6) {
-      toast.error('Please enter the complete 6-digit code');
+      showError('Please enter the complete 6-digit code');
       return;
     }
     if (!email.trim()) {
-      toast.error('Email is required');
+      showError('Email is required');
       return;
     }
 
     setLoading(true);
     try {
       const res = await verifyOTP(email.trim(), fullOtp);
-      toast.success(res.message || 'Email verified! Welcome 🎉', {
-        style: { fontFamily: 'Inter, sans-serif', fontSize: '14px', borderRadius: '8px', background: '#1a1a1a', color: '#fff' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess(res.message || 'Email verified! Welcome 🎉');
       // verifyOTP saves session internally, redirect home or admin
       navigate(res.user?.role === 'admin' ? '/admin' : '/');
     } catch (err) {
-      toast.error(err.message || 'Invalid or expired OTP');
+      showError(err.message || 'Invalid or expired OTP');
       // shake the inputs
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
@@ -121,21 +118,18 @@ export default function VerifyOtp() {
   const handleResend = async () => {
     if (cooldown > 0 || resending) return;
     if (!email.trim()) {
-      toast.error('Enter your email first');
+      showError('Enter your email first');
       return;
     }
     setResending(true);
     try {
       const res = await authApi.resendOTP({ email: email.trim() });
-      toast.success(res.message || 'New OTP sent! Check your inbox.', {
-        style: { fontFamily: 'Inter, sans-serif', fontSize: '14px', borderRadius: '8px', background: '#1a1a1a', color: '#fff' },
-        iconTheme: { primary: '#c9a96e', secondary: '#fff' },
-      });
+      showSuccess(res.message || 'New OTP sent! Check your inbox.');
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
       startCooldown();
     } catch (err) {
-      toast.error(err.message || 'Failed to resend OTP');
+      showError(err.message || 'Failed to resend OTP');
     } finally {
       setResending(false);
     }

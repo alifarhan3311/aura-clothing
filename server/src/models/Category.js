@@ -28,11 +28,17 @@ const categorySchema = new mongoose.Schema(
       lowercase: true,
     },
 
-    // Top-level catalog section this category belongs to
-    // Maps to navbar top-level links: /women, /men, /kids
+    // Foreign Key reference to top-level Department / Section layer
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+      index: true,
+      default: null,
+    },
+
+    // Legacy fallback string slug ("women", "men", "kids", etc.)
     section: {
       type: String,
-      enum: ["women", "men", "kids"],
       default: "women",
       index: true,
     },
