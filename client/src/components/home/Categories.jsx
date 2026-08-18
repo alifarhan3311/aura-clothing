@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Layers } from 'lucide-react';
+import { ArrowRight, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { departmentApi } from '../../lib/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -46,19 +46,12 @@ const DEFAULT_DEPARMENTS = [
   },
 ];
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, scale: 0.9, y: 24 },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-};
-
 export default function Categories() {
   const [departments, setDepartments] = useState(DEFAULT_DEPARMENTS);
   const [loading, setLoading] = useState(true);
+  const scrollRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
     departmentApi
@@ -72,10 +65,40 @@ export default function Categories() {
       .finally(() => setLoading(false));
   }, []);
 
+  const checkScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const hasScroll = el.scrollWidth > el.clientWidth + 5;
+    setCanScrollLeft(hasScroll && el.scrollLeft > 10);
+    setCanScrollRight(hasScroll && el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener('scroll', checkScroll, { passive: true });
+    window.addEventListener('resize', checkScroll);
+    return () => {
+      el.removeEventListener('scroll', checkScroll);
+      window.removeEventListener('resize', checkScroll);
+    };
+  }, [departments]);
+
+  const scroll = (direction) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const amount = direction === 'left' ? -380 : 380;
+    el.scrollBy({ left: amount, behavior: 'smooth' });
+  };
+
+  // Center if 3 or fewer items on desktop, else scrollable
+  const isCentered = departments.length <= 3;
+
   return (
-    <section className="py-20 lg:py-24 bg-[#faf8f5]">
+    <section className="py-20 lg:py-24 bg-[#faf8f5] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        
+
         {/* Header */}
         <div className="text-center mb-14">
           <div className="flex items-center justify-center mb-3">
@@ -93,63 +116,99 @@ export default function Categories() {
             Explore our curated collections crafted for every member of the family
           </p>
         </div>
+      </div>
 
-        {/* Dynamic Round Circle Cards Grid */}
-        <motion.div
-          className="flex flex-wrap justify-center items-center gap-8 sm:gap-10 lg:gap-12"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-60px' }}
+      {/* Horizontal Scroll / Centered Strip */}
+      <div className="relative max-w-7xl mx-auto">
+        {/* Left Fade */}
+        <div className={`pointer-events-none absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#faf8f5] to-transparent z-10 transition-opacity duration-300 ${canScrollLeft ? 'opacity-100' : 'opacity-0'}`} />
+        {/* Right Fade */}
+        <div className={`pointer-events-none absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#faf8f5] to-transparent z-10 transition-opacity duration-300 ${canScrollRight ? 'opacity-100' : 'opacity-0'}`} />
+
+        {/* Left Scroll Arrow */}
+        {canScrollLeft && (
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white shadow-xl border border-gray-200 flex items-center justify-center text-gray-800 hover:bg-[#c9a96e] hover:text-white hover:border-[#c9a96e] transition-all cursor-pointer"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={22} />
+          </button>
+        )}
+
+        {/* Right Scroll Arrow */}
+        {canScrollRight && (
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white shadow-xl border border-gray-200 flex items-center justify-center text-gray-800 hover:bg-[#c9a96e] hover:text-white hover:border-[#c9a96e] transition-all cursor-pointer"
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={22} />
+          </button>
+        )}
+
+        {/* Scrollable / Centered Row */}
+        <div
+          ref={scrollRef}
+          className={`flex items-center gap-6 sm:gap-8 px-6 sm:px-12 pb-6 overflow-x-auto scrollbar-none scroll-smooth ${
+            isCentered ? 'justify-start md:justify-center' : 'justify-start'
+          }`}
+          style={{ scrollSnapType: 'x mandatory' }}
         >
-          {departments.map((dept) => (
-            <motion.div key={dept._id || dept.slug} variants={cardVariants}>
+          {departments.map((dept, index) => (
+            <motion.div
+              key={dept._id || dept.slug}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.45, ease: 'easeOut', delay: index * 0.06 }}
+              style={{ scrollSnapAlign: 'center' }}
+              className="shrink-0"
+            >
               <Link
                 to={`/shop?section=${dept.slug}`}
                 className="group flex flex-col items-center text-center transition-all duration-300"
               >
-                {/* Round Circle Avatar with Hover Effect */}
-                <div className="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full p-1.5 bg-white border-2 border-gray-200 group-hover:border-[#c9a96e] transition-all duration-300 shadow-md group-hover:shadow-2xl group-hover:shadow-[#c9a96e]/20 group-hover:-translate-y-2">
-                  <div className="w-full h-full rounded-full overflow-hidden relative bg-gray-100">
-                    {dept.image ? (
-                      <img
-                        src={resolveImg(dept.image)}
-                        alt={dept.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl bg-amber-50">
-                        {dept.icon || '✨'}
-                      </div>
-                    )}
-                    {/* Dark gradient overlay on hover */}
-                    <div className="absolute inset-0 bg-black/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-
-                  {/* Emoji Badge on bottom right of circle */}
-                  <span className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-white border border-gray-100 shadow-md flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
-                    {dept.icon || '✨'}
-                  </span>
-                </div>
-
-                {/* Text below circle */}
-                <div className="mt-4">
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-amber-800 transition-colors flex items-center justify-center gap-1">
-                    {dept.name}
-                    <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-amber-700" />
-                  </h3>
-                  {dept.subtitle && (
-                    <p className="text-xs text-gray-500 font-medium mt-0.5 max-w-[150px] truncate">
-                      {dept.subtitle}
-                    </p>
+                {/* Large Responsive Department Card */}
+                <div className="relative w-64 h-72 sm:w-72 sm:h-80 lg:w-80 lg:h-96 rounded-3xl overflow-hidden border-2 border-gray-200 group-hover:border-[#c9a96e] transition-all duration-300 shadow-md group-hover:shadow-2xl group-hover:shadow-[#c9a96e]/25 group-hover:-translate-y-2 bg-gray-100">
+                  {dept.image ? (
+                    <img
+                      src={resolveImg(dept.image)}
+                      alt={dept.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-7xl bg-amber-50">
+                      {dept.icon || '✨'}
+                    </div>
                   )}
+
+                  {/* Dark overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-300" />
+
+                  {/* Bottom Info Card */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-left flex items-end justify-between">
+                    <div>
+                      {dept.subtitle && (
+                        <p className="text-amber-300 text-xs font-bold tracking-wider uppercase mb-1">
+                          {dept.subtitle}
+                        </p>
+                      )}
+                      <h3 className="text-white font-black text-2xl sm:text-3xl leading-tight flex items-center gap-2">
+                        {dept.name}
+                      </h3>
+                    </div>
+
+                    <div className="w-10 h-10 rounded-full bg-white/20 border border-white/40 backdrop-blur-md flex items-center justify-center text-white group-hover:bg-[#c9a96e] group-hover:border-[#c9a96e] transition-all duration-300 shrink-0">
+                      <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                  </div>
                 </div>
               </Link>
             </motion.div>
           ))}
-        </motion.div>
-
+        </div>
       </div>
     </section>
   );
