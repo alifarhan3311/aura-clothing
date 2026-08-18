@@ -96,11 +96,11 @@ export default function Hero() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Background image slider — Full crisp image on right, clean fade on left */}
+      {/* Background image slider (Desktop / Tablet only) — Full crisp image on right, clean fade on left */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide._id || currentIndex}
-          className="absolute inset-0"
+          className="absolute inset-0 hidden md:block"
           initial={{ opacity: 0, scale: 1.03 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
@@ -115,12 +115,23 @@ export default function Hero() {
 
           {/* Left gradient overlay to make left text 100% readable without obscuring right actor */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#faf8f5] via-[#faf8f5]/85 to-transparent w-full md:w-[65%]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#faf8f5]/60 via-transparent to-transparent md:hidden" />
         </motion.div>
       </AnimatePresence>
 
+      {/* Mobile Ambient Glow & Shading (Active only on mobile screens when image is hidden) */}
+      <div className="absolute inset-0 md:hidden pointer-events-none overflow-hidden">
+        {/* Soft luxury glow orbs */}
+        <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full bg-gradient-to-br from-amber-200/60 via-amber-100/40 to-rose-100/30 blur-3xl opacity-80" />
+        <div className="absolute top-1/3 -left-20 w-64 h-64 rounded-full bg-gradient-to-tr from-amber-200/50 via-orange-100/40 to-transparent blur-2xl opacity-70" />
+        <div className="absolute -bottom-10 right-2 w-80 h-80 rounded-full bg-gradient-to-tl from-stone-200/60 via-amber-100/40 to-transparent blur-3xl opacity-80" />
+        
+        {/* Radial ambient shading */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.12),transparent_55%),radial-gradient(circle_at_bottom_left,rgba(251,146,60,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-amber-900/[0.03]" />
+      </div>
+
       {/* Main Slide Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 w-full py-20 lg:py-24 z-10">
+      <div className="relative max-w-7xl mx-auto px-5 sm:px-6 w-full py-16 sm:py-20 lg:py-24 z-10">
         <div className="max-w-xl">
           <AnimatePresence mode="wait">
             <motion.div
@@ -195,12 +206,12 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Prev / Next controls */}
+      {/* Prev / Next controls (Desktop / Tablet) */}
       {slides.length > 1 && (
         <>
           <button
             onClick={handlePrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 backdrop-blur-xs border border-gray-200 flex items-center justify-center text-gray-900 hover:bg-gray-900 hover:text-white transition-all z-20 shadow-lg"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 backdrop-blur-xs border border-gray-200 hidden sm:flex items-center justify-center text-gray-900 hover:bg-gray-900 hover:text-white transition-all z-20 shadow-lg"
             aria-label="Previous Slide"
           >
             <ChevronLeft size={20} />
@@ -208,7 +219,7 @@ export default function Hero() {
 
           <button
             onClick={handleNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 backdrop-blur-xs border border-gray-200 flex items-center justify-center text-gray-900 hover:bg-gray-900 hover:text-white transition-all z-20 shadow-lg"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 backdrop-blur-xs border border-gray-200 hidden sm:flex items-center justify-center text-gray-900 hover:bg-gray-900 hover:text-white transition-all z-20 shadow-lg"
             aria-label="Next Slide"
           >
             <ChevronRight size={20} />
