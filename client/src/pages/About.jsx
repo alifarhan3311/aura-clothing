@@ -116,23 +116,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
-      {/* Stats */}
-      {/* <section className="py-16 bg-gray-900 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
-          {[
-            { value: '2019', label: 'Founded' },
-            { value: '10K+', label: 'Customers' },
-            { value: '500+', label: 'Products' },
-            { value: '4.9★', label: 'Avg Rating' },
-          ].map(({ value, label }) => (
-            <div key={label}>
-              <p className="text-3xl font-bold text-amber-400 mb-1">{value}</p>
-              <p className="text-sm text-gray-400">{label}</p>
-            </div>
-          ))}
-        </div>
-      </section> */}
     </main>
   );
 }
