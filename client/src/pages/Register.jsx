@@ -1,20 +1,31 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { showSuccess, showError } from '../lib/toastUtils';
 import { authApi } from '../lib/api';
 
 export default function Register() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
   const [showPass, setShowPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const from = location.state?.from || null;
 
   const validate = () => {
     const errs = {};
-    if (!form.name.trim()) errs.name = 'Full name is required';
+    if (!form.firstName.trim()) errs.firstName = 'First name is required';
+    if (!form.lastName.trim()) errs.lastName = 'Last name is required';
     if (!form.email) errs.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Invalid email address';
     if (!form.password) errs.password = 'Password is required';
@@ -32,15 +43,17 @@ export default function Register() {
       setLoading(true);
       try {
         await authApi.register({
-          name: form.name,
-          email: form.email,
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
+          name: `${form.firstName.trim()} ${form.lastName.trim()}`,
+          email: form.email.trim(),
           password: form.password,
         });
 
         showSuccess('Account created! Check your email for the OTP.');
 
-        // Redirect to OTP verification page, passing email in state
-        navigate('/verify-otp', { state: { email: form.email } });
+        // Redirect to OTP verification page, passing email and from in state
+        navigate('/verify-otp', { state: { email: form.email.trim(), from } });
       } catch (err) {
         showError(err.message || 'Registration failed');
       } finally {
@@ -53,13 +66,6 @@ export default function Register() {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
     if (errors[e.target.name]) setErrors((errs) => ({ ...errs, [e.target.name]: '' }));
   };
-
-  const fields = [
-    { name: 'name', label: 'Full Name', icon: User, type: 'text', placeholder: 'Sara Ahmed' },
-    { name: 'email', label: 'Email Address', icon: Mail, type: 'email', placeholder: 'you@example.com' },
-    { name: 'password', label: 'Password', icon: Lock, type: showPass ? 'text' : 'password', placeholder: 'Min 8 characters' },
-    { name: 'confirmPassword', label: 'Confirm Password', icon: Lock, type: showPass ? 'text' : 'password', placeholder: 'Re-enter your password' },
-  ];
 
   return (
     <main className="min-h-screen bg-[#fafafa] flex items-center justify-center py-16 px-4">
@@ -81,30 +87,129 @@ export default function Register() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {fields.map(({ name, label, icon: Icon, type, placeholder }) => (
-              <div key={name}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-gray-600">{label}</label>
-                  {(name === 'password' || name === 'confirmPassword') && name === 'password' && (
-                    <button type="button" onClick={() => setShowPass((s) => !s)} className="text-xs text-gray-500 flex items-center gap-1">
-                      {showPass ? <><EyeOff size={11} /> Hide</> : <><Eye size={11} /> Show</>}
-                    </button>
-                  )}
-                </div>
+            {/* First Name & Last Name Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1.5 block">
+                  First Name <span className="text-rose-500">*</span>
+                </label>
                 <div className="relative">
-                  <Icon size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
-                    name={name}
-                    type={type}
-                    value={form[name]}
+                    name="firstName"
+                    type="text"
+                    value={form.firstName}
                     onChange={handleChange}
-                    placeholder={placeholder}
-                    className={`w-full pl-10 pr-4 py-3.5 rounded-xl border text-sm outline-none transition-colors ${errors[name] ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-gray-400'}`}
+                    placeholder="Sara"
+                    className={`w-full pl-9 pr-3 py-3 rounded-xl border text-sm outline-none transition-colors ${
+                      errors.firstName ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-gray-400'
+                    }`}
                   />
                 </div>
-                {errors[name] && <p className="text-xs text-red-500 mt-1">{errors[name]}</p>}
+                {errors.firstName && <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>}
               </div>
-            ))}
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1.5 block">
+                  Last Name <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    name="lastName"
+                    type="text"
+                    value={form.lastName}
+                    onChange={handleChange}
+                    placeholder="Ahmed"
+                    className={`w-full pl-9 pr-3 py-3 rounded-xl border text-sm outline-none transition-colors ${
+                      errors.lastName ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-gray-400'
+                    }`}
+                  />
+                </div>
+                {errors.lastName && <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>}
+              </div>
+            </div>
+
+            {/* Email Address */}
+            <div>
+              <label className="text-xs font-semibold text-gray-600 mb-1.5 block">
+                Email Address <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm outline-none transition-colors ${
+                    errors.email ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-gray-400'
+                  }`}
+                />
+              </div>
+              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+            </div>
+
+            {/* Password */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-gray-600">
+                  Password <span className="text-rose-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPass((s) => !s)}
+                  className="text-xs text-gray-500 flex items-center gap-1"
+                >
+                  {showPass ? <><EyeOff size={11} /> Hide</> : <><Eye size={11} /> Show</>}
+                </button>
+              </div>
+              <div className="relative">
+                <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  name="password"
+                  type={showPass ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Min 8 characters"
+                  className={`w-full pl-10 pr-10 py-3 rounded-xl border text-sm outline-none transition-colors ${
+                    errors.password ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-gray-400'
+                  }`}
+                />
+              </div>
+              {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-gray-600">
+                  Confirm Password <span className="text-rose-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPass((s) => !s)}
+                  className="text-xs text-gray-500 flex items-center gap-1"
+                >
+                  {showConfirmPass ? <><EyeOff size={11} /> Hide</> : <><Eye size={11} /> Show</>}
+                </button>
+              </div>
+              <div className="relative">
+                <Lock size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  name="confirmPassword"
+                  type={showConfirmPass ? 'text' : 'password'}
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Re-enter your password"
+                  className={`w-full pl-10 pr-10 py-3 rounded-xl border text-sm outline-none transition-colors ${
+                    errors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-gray-400'
+                  }`}
+                />
+              </div>
+              {errors.confirmPassword && <p className="text-xs text-red-500 mt-1">{errors.confirmPassword}</p>}
+            </div>
 
             {/* Password strength visual */}
             {form.password.length > 0 && (
@@ -145,7 +250,7 @@ export default function Register() {
 
           <p className="text-center text-sm text-gray-500 mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-amber-700 font-semibold hover:underline">
+            <Link to="/login" state={{ from }} className="text-amber-700 font-semibold hover:underline">
               Sign In
             </Link>
           </p>

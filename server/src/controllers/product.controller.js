@@ -1,5 +1,110 @@
 import Product from "../models/Product.js";
 import { deleteFile, buildPublicPath } from "../middlewares/upload.middleware.js";
+import redis from "../lib/redis.js";
+
+/**
+ * @desc    High-performance Product Search with Redis Cache-Aside
+ * @route   GET /api/products/search?q=:query
+ * @access  Public
+ */
+export const searchProducts = async (req, res) => {
+  try {
+    const rawQuery = req.query.q || req.query.query || "";
+    const cleanQuery = rawQuery.trim().toLowerCase();
+
+    if (!cleanQuery) {
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        source: "empty",
+        products: [],
+      });
+    }
+
+    const cacheKey = `search:${cleanQuery}`;
+
+    // 1. Check Redis Cache
+    let cachedData = null;
+    try {
+      const raw = await redis.get(cacheKey);
+      if (raw) {
+        cachedData = JSON.parse(raw);
+      }
+    } catch (redisErr) {
+      console.warn("Redis search read error:", redisErr.message);
+    }
+
+    if (cachedData && Array.isArray(cachedData)) {
+      res.set("X-Cache-Source", "redis");
+      return res.status(200).json({
+        success: true,
+        count: cachedData.length,
+        source: "redis",
+        products: cachedData,
+      });
+    }
+
+    // 2. Database Fallback (Cache Miss)
+    const searchRegex = new RegExp(cleanQuery, "i");
+    const products = await Product.find({
+      isActive: true,
+      $or: [
+        { name: searchRegex },
+        { type: searchRegex },
+        { colors: searchRegex },
+        { description: searchRegex },
+      ],
+    })
+      .populate("category", "name image")
+      .populate("brand", "name logo")
+      .select("name mainImage images variants category brand type isFeatured createdAt")
+      .limit(8)
+      .lean();
+
+    const formattedProducts = products.map((p) => {
+      const minPrice = p.variants?.length
+        ? Math.min(...p.variants.map((v) => v.price))
+        : 0;
+      const minDiscount = p.variants?.length
+        ? Math.max(...p.variants.map((v) => v.discount || 0))
+        : 0;
+      const finalPrice =
+        minDiscount > 0 ? Math.round(minPrice * (1 - minDiscount / 100)) : minPrice;
+
+      return {
+        _id: p._id,
+        name: p.name,
+        image: p.mainImage || p.images?.[0] || null,
+        category: p.category?.name || "General",
+        brand: p.brand?.name || null,
+        price: finalPrice,
+        originalPrice: minPrice,
+        discount: minDiscount,
+      };
+    });
+
+    // 3. Set Redis Cache with 1-hour TTL (3600 seconds)
+    try {
+      await redis.set(cacheKey, JSON.stringify(formattedProducts), "EX", 3600);
+    } catch (redisErr) {
+      console.warn("Redis search write error:", redisErr.message);
+    }
+
+    res.set("X-Cache-Source", "mongodb");
+    return res.status(200).json({
+      success: true,
+      count: formattedProducts.length,
+      source: "mongodb",
+      products: formattedProducts,
+    });
+  } catch (error) {
+    console.error("Search products error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to search products",
+    });
+  }
+};
 
 // ── Create Product (Admin) ────────────────────────────────────────────────────
 

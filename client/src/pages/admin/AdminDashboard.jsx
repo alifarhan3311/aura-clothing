@@ -9,7 +9,8 @@ import UsersPage from './UsersPage';
 import OrdersPage from './OrdersPage';
 import HeroSlidesPage from './HeroSlidesPage';
 import DepartmentsPage from './DepartmentsPage';
-import { brandApi, categoryApi, productApi, userApi, couponApi, orderApi } from '../../lib/api';
+import ContactMessagesPage from './ContactMessagesPage';
+import { brandApi, categoryApi, productApi, userApi, couponApi, orderApi, contactApi } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 
 import {
@@ -26,6 +27,7 @@ import {
   Clock,
   TrendingUp,
   AlertTriangle,
+  MessageSquare,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -46,7 +48,7 @@ const ORDER_STATUS_COLORS = {
 };
 
 // ── Dashboard overview ────────────────────────────────────────────────────────
-function DashboardOverview({ brands, categories, products, coupons, users, orders, loading }) {
+function DashboardOverview({ brands, categories, products, coupons, users, orders, inquiryStats, loading }) {
   const navigate = useNavigate();
 
   const totalStock = products.reduce(
@@ -56,6 +58,7 @@ function DashboardOverview({ brands, categories, products, coupons, users, order
   const activeCoupons = coupons.filter((c) => c.isActive).length;
   const pendingOrders = orders.filter((o) => o.status === 'pending').length;
   const cancelRequestOrders = orders.filter((o) => o.status === 'cancel_requested').length;
+  const pendingInquiries = inquiryStats?.pending || 0;
   const totalRevenue = orders
     .filter((o) => !['cancelled', 'rejected'].includes(o.status))
     .reduce((sum, o) => sum + (o.total || 0), 0);
@@ -70,6 +73,16 @@ function DashboardOverview({ brands, categories, products, coupons, users, order
       iconColor: 'text-amber-600',
       link: '/admin/orders',
       alert: pendingOrders > 0,
+    },
+    {
+      title: 'Inquiries',
+      value: inquiryStats?.total || 0,
+      subtext: `${pendingInquiries} pending`,
+      icon: MessageSquare,
+      iconBg: 'bg-orange-50',
+      iconColor: 'text-orange-600',
+      link: '/admin/messages',
+      alert: pendingInquiries > 0,
     },
     {
       title: 'Products',
@@ -323,6 +336,7 @@ export default function AdminDashboard() {
   const [coupons, setCoupons]       = useState([]);
   const [users, setUsers]           = useState([]);
   const [orders, setOrders]         = useState([]);
+  const [inquiryStats, setInquiryStats] = useState({ total: 0, pending: 0 });
   const [loading, setLoading]       = useState(true);
 
   const location = useLocation();
@@ -334,13 +348,14 @@ export default function AdminDashboard() {
     async function loadAll() {
       setLoading(true);
       try {
-        const [bRes, cRes, pRes, couponRes, userRes, orderRes] = await Promise.allSettled([
+        const [bRes, cRes, pRes, couponRes, userRes, orderRes, inqRes] = await Promise.allSettled([
           brandApi.getAll({ limit: 100 }),
           categoryApi.getAll({ limit: 100 }),
           productApi.getAll({ limit: 100 }),
           couponApi.getAll({ limit: 100 }),
           userApi.getAll({ limit: 100 }),
           orderApi.getAll({ limit: 20 }),
+          contactApi.getStats(),
         ]);
 
         if (bRes.status === 'fulfilled') {
@@ -367,6 +382,10 @@ export default function AdminDashboard() {
           const d = orderRes.value.orders || orderRes.value.data || orderRes.value;
           if (Array.isArray(d)) setOrders(d);
         }
+        if (inqRes.status === 'fulfilled') {
+          const s = inqRes.value.stats || inqRes.value;
+          if (s) setInquiryStats(s);
+        }
       } catch (err) {
         console.warn('Dashboard load error:', err.message);
       } finally {
@@ -386,17 +405,20 @@ export default function AdminDashboard() {
     if (location.pathname.includes('/products'))    return 'Products';
     if (location.pathname.includes('/slides'))      return 'Hero Slides';
     if (location.pathname.includes('/users'))       return 'Users';
+    if (location.pathname.includes('/messages'))    return 'Inquiries & Messages';
     return 'Overview';
   };
 
   const statsCounts = {
-    orders:         orders.length,
-    cancelRequests: orders.filter((o) => o.status === 'cancel_requested').length,
-    brands:         brands.length,
-    categories:     categories.length,
-    products:       products.length,
-    coupons:        coupons.length,
-    users:          users.length,
+    orders:           orders.length,
+    cancelRequests:   orders.filter((o) => o.status === 'cancel_requested').length,
+    brands:           brands.length,
+    categories:       categories.length,
+    products:         products.length,
+    coupons:          coupons.length,
+    users:            users.length,
+    inquiries:        inquiryStats.total || 0,
+    pendingInquiries: inquiryStats.pending || 0,
   };
 
   return (
@@ -412,6 +434,7 @@ export default function AdminDashboard() {
               coupons={coupons}
               users={users}
               orders={orders}
+              inquiryStats={inquiryStats}
               loading={loading}
             />
           }
@@ -437,6 +460,8 @@ export default function AdminDashboard() {
         <Route path="departments" element={<DepartmentsPage />} />
         <Route path="slides" element={<HeroSlidesPage />} />
         <Route path="users" element={<UsersPage users={users} setUsers={setUsers} />} />
+        <Route path="messages" element={<ContactMessagesPage />} />
+        <Route path="contact" element={<ContactMessagesPage />} />
       </Routes>
     </AdminLayout>
   );

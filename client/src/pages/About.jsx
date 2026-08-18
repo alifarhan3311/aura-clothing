@@ -118,7 +118,7 @@ export default function About() {
       </section>
 
       {/* Stats */}
-      <section className="py-16 bg-gray-900 text-white">
+      {/* <section className="py-16 bg-gray-900 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
           {[
             { value: '2019', label: 'Founded' },
@@ -132,7 +132,7 @@ export default function About() {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
     </main>
   );
 }

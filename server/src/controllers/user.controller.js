@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
+import { buildPublicPath, deleteFile } from "../middlewares/upload.middleware.js";
 
 // ── Get All Users (Admin) ─────────────────────────────────────────────────────
 
@@ -64,22 +65,39 @@ export const createUser = async (req, res) => {
         .status(400)
         .json({ success: false, message: "name, email, and password are required" });
 
-    const existing = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+    const existing = await User.findOne({ email: cleanEmail });
     if (existing)
       return res
         .status(409)
         .json({ success: false, message: "Email already registered" });
 
     const hashed = await bcrypt.hash(password, 12);
-    const user = await User.create({
-      name,
-      email,
+
+    let parsedAddress = address;
+    if (typeof address === "string") {
+      try {
+        parsedAddress = JSON.parse(address);
+      } catch {
+        parsedAddress = { street: address };
+      }
+    }
+
+    const userDataToCreate = {
+      name: name.trim(),
+      email: cleanEmail,
       password: hashed,
       role: role || "user",
-      phone,
-      address,
+      phone: phone ? phone.trim() : "",
+      address: parsedAddress,
       isVerified: true, // admin-created users are pre-verified
-    });
+    };
+
+    if (req.file) {
+      userDataToCreate.avatar = buildPublicPath(req.file);
+    }
+
+    const user = await User.create(userDataToCreate);
 
     const { password: _, ...userData } = user.toObject();
     return res.status(201).json({
@@ -98,21 +116,41 @@ export const updateUser = async (req, res) => {
   try {
     const { name, email, role, phone, address, isVerified } = req.body;
 
+    const existingUser = await User.findById(req.params.id);
+    if (!existingUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
     const updateData = {};
-    if (name !== undefined) updateData.name = name;
-    if (email !== undefined) updateData.email = email;
+    if (name !== undefined) updateData.name = name.trim();
+    if (email !== undefined) updateData.email = email.trim().toLowerCase();
     if (role !== undefined) updateData.role = role;
-    if (phone !== undefined) updateData.phone = phone;
-    if (address !== undefined) updateData.address = address;
-    if (isVerified !== undefined) updateData.isVerified = isVerified;
+    if (phone !== undefined) updateData.phone = phone.trim();
+    if (isVerified !== undefined) updateData.isVerified = isVerified === "true" || isVerified === true;
+
+    if (address !== undefined) {
+      let parsedAddress = address;
+      if (typeof address === "string") {
+        try {
+          parsedAddress = JSON.parse(address);
+        } catch {
+          parsedAddress = { street: address };
+        }
+      }
+      updateData.address = parsedAddress;
+    }
+
+    if (req.file) {
+      if (existingUser.avatar) {
+        deleteFile(existingUser.avatar);
+      }
+      updateData.avatar = buildPublicPath(req.file);
+    }
 
     const user = await User.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
     }).select("-password");
-
-    if (!user)
-      return res.status(404).json({ success: false, message: "User not found" });
 
     return res.status(200).json({
       success: true,

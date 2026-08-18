@@ -7,9 +7,20 @@ import { ShieldCheck, UserCheck, UserX } from 'lucide-react';
 import { showSuccess, showError, showDelete } from '../../lib/toastUtils';
 import { userApi } from '../../lib/api';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD && import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : 'http://localhost:5000');
+
+function resolveImg(path) {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:') || path.startsWith('data:')) {
+    return path;
+  }
+  const cleanBase = BASE_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${cleanBase}${cleanPath}`;
+}
+
 export default function UsersPage({ users, setUsers }) {
   const [detailItem, setDetailItem] = useState(null);
-  const [editingItem, setEditingItem] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const columns = [
@@ -21,8 +32,9 @@ export default function UsersPage({ users, setUsers }) {
       render: (val, row) => (
         <img
           src={
-            val ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(row.name || 'U')}&background=c9a96e&color=111&bold=true&size=80`
+            val
+              ? resolveImg(val)
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(row.name || 'U')}&background=c9a96e&color=111&bold=true&size=80`
           }
           alt={row.name}
           className="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-xs"
@@ -31,7 +43,7 @@ export default function UsersPage({ users, setUsers }) {
     },
     {
       key: 'name',
-      label: 'User',
+      label: 'Customer Name',
       sortable: true,
       render: (val, row) => (
         <div>
@@ -57,7 +69,7 @@ export default function UsersPage({ users, setUsers }) {
     },
     {
       key: 'isVerified',
-      label: 'Verified',
+      label: 'Status',
       sortable: true,
       render: (val) =>
         val ? (
@@ -78,7 +90,7 @@ export default function UsersPage({ users, setUsers }) {
     },
     {
       key: 'createdAt',
-      label: 'Joined',
+      label: 'Joined Date',
       sortable: true,
       render: (val) => (
         <span className="text-gray-400 text-[11px]">
@@ -100,18 +112,6 @@ export default function UsersPage({ users, setUsers }) {
     }
   };
 
-  const handleEdit = async (formData) => {
-    try {
-      const res = await userApi.update(editingItem._id, formData);
-      const updated = res.user || res.data || { ...editingItem, ...formData };
-      setUsers((prev) => prev.map((u) => (u._id === editingItem._id ? updated : u)));
-      setEditingItem(null);
-      showSuccess('User profile updated successfully!');
-    } catch (error) {
-      showError(error.message || 'Failed to update user');
-    }
-  };
-
   const handleDelete = async (id) => {
     try {
       await userApi.delete(id);
@@ -126,11 +126,10 @@ export default function UsersPage({ users, setUsers }) {
     <div className="space-y-6">
       <AdminDataTable
         title="User Management"
-        subtitle="Manage customer accounts, admin roles, and verification status"
+        subtitle="View registered customer details, roles, and verification status (Read-only for customer data)"
         columns={columns}
         data={users}
         onView={(row) => setDetailItem(row)}
-        onEdit={(row) => setEditingItem(row)}
         onDelete={handleDelete}
         onCreate={() => setIsCreateOpen(true)}
         createLabel="Add User"
@@ -158,7 +157,7 @@ export default function UsersPage({ users, setUsers }) {
       <AdminDetailView
         isOpen={Boolean(detailItem)}
         onClose={() => setDetailItem(null)}
-        title={detailItem?.name}
+        title={`Customer Details: ${detailItem?.name}`}
         type="user"
         data={detailItem}
       />
@@ -170,19 +169,6 @@ export default function UsersPage({ users, setUsers }) {
         isEdit={false}
       >
         <UserForm onSubmit={handleCreate} onCancel={() => setIsCreateOpen(false)} />
-      </AdminFormModal>
-
-      <AdminFormModal
-        isOpen={Boolean(editingItem)}
-        onClose={() => setEditingItem(null)}
-        title={`Edit User: ${editingItem?.name}`}
-        isEdit={true}
-      >
-        <UserForm
-          initialData={editingItem}
-          onSubmit={handleEdit}
-          onCancel={() => setEditingItem(null)}
-        />
       </AdminFormModal>
     </div>
   );

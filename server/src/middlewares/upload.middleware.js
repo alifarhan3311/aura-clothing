@@ -64,10 +64,12 @@ export const uploadProduct = multer({
 });
 
 export const uploadAvatar = multer({
-  storage: createStorage("avatar"),
+  storage: createStorage("user"),
   fileFilter: imageFilter,
-  limits: { fileSize: 3 * 1024 * 1024 }, // 3 MB
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
 });
+
+export const uploadUser = uploadAvatar;
 
 export const uploadSlide = multer({
   storage: createStorage("slide"),

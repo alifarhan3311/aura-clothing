@@ -3,6 +3,7 @@ import {
   createProduct,
   getAllProducts,
   getProduct,
+  searchProducts,
   updateProduct,
   updateProductStatus,
   deleteProduct,
@@ -13,6 +14,7 @@ import { uploadProduct } from "../middlewares/upload.middleware.js";
 const router = Router();
 
 // ── Public / User routes ──────────────────────────────────────────────────────
+router.get("/search", searchProducts);
 router.get("/", getAllProducts);
 router.get("/:id", getProduct);
 

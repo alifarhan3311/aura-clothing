@@ -2,6 +2,18 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    firstName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    lastName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
     name: {
       type: String,
       required: true,
@@ -45,11 +57,12 @@ const userSchema = new mongoose.Schema(
     },
 
     address: {
-      street: { type: String, trim: true },
-      city: { type: String, trim: true },
-      state: { type: String, trim: true },
-      zip: { type: String, trim: true },
-      country: { type: String, trim: true },
+      street: { type: String, trim: true, default: "" },
+      city: { type: String, trim: true, default: "" },
+      state: { type: String, trim: true, default: "" },
+      zip: { type: String, trim: true, default: "" },
+      postalCode: { type: String, trim: true, default: "" },
+      country: { type: String, trim: true, default: "Pakistan" },
     },
   },
   {

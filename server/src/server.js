@@ -18,6 +18,7 @@ import wishlistRoutes from "./routes/wishlist.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import slideRoutes from "./routes/slide.routes.js";
 import departmentRoutes from "./routes/department.routes.js";
+import contactRoutes from "./routes/contact.routes.js";
 
 dotenv.config();
 
@@ -56,10 +57,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/catalog", catalogRoutes);
 app.use("/api/wishlist", wishlistRoutes);
-app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/slides", slideRoutes);
 app.use("/api/departments", departmentRoutes);
+app.use("/api/contact", contactRoutes);
+
 
 // ── Health check ──────────────────────────────────────────────────────────────
 

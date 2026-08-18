@@ -593,3 +593,224 @@ export function orderTrackingEmail(order) {
 
   return layout("Order Confirmed & Tracking – Fade Find", body);
 }
+
+// ── 7. Contact Acknowledgment (to User) ───────────────────────────────────────
+
+export function contactUserAckEmail(contact) {
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+
+  const body = `
+    <h2 style="margin:0 0 6px;font-size:22px;color:#111827;font-weight:800;">
+      We've Received Your Message! ✉️
+    </h2>
+    <p style="margin:0 0 20px;font-size:14px;color:#6b7280;">
+      Hi ${contact.name}, thank you for reaching out to Fade Find. Our support team has received your message and will get back to you shortly.
+    </p>
+
+    <!-- Message snapshot -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:12px;overflow:hidden;margin-bottom:24px;border:1px solid #e5e7eb;">
+      <tr>
+        <td style="padding:14px 20px;font-size:12px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #e5e7eb;background:#f3f4f6;">
+          Inquiry Summary
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:18px 20px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:13px;color:#374151;padding-bottom:10px;">
+                <strong>Subject:</strong> <span style="color:#111827;font-weight:600;">${contact.subject || 'General Inquiry'}</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:13px;color:#374151;padding-bottom:10px;">
+                <strong>Ticket ID:</strong> <span style="font-family:monospace;color:#6b7280;font-size:12px;">${contact._id}</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:13px;color:#374151;padding-bottom:10px;">
+                <strong>Status:</strong> <span style="display:inline-block;padding:2px 8px;background:#fef3c7;color:#d97706;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;">Pending Review</span>
+              </td>
+            </tr>
+          </table>
+
+          <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;margin-top:8px;">
+            <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;">Your Message</p>
+            <p style="margin:0;font-size:13px;color:#374151;line-height:1.6;white-space:pre-wrap;">${contact.message}</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <div style="background:#fef9f0;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:24px;">
+      <p style="margin:0;font-size:13px;color:#92400e;line-height:1.6;">
+        ⏱️ Our average response time is within <strong>24 business hours</strong>. You can also track the status of your inquiry directly from your account dashboard.
+      </p>
+    </div>
+
+    <div style="text-align:center;margin-top:24px;">
+      <a href="${clientUrl}/profile"
+         style="display:inline-block;background:#111827;color:#ffffff;font-size:13px;font-weight:700;padding:12px 28px;border-radius:999px;text-decoration:none;">
+        View Account Dashboard →
+      </a>
+    </div>
+  `;
+
+  return layout("Message Received – Fade Find", body);
+}
+
+// ── 8. Contact Notification (to Admin) ────────────────────────────────────────
+
+export function contactAdminNotificationEmail(contact) {
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  const adminUrl = `${clientUrl}/admin/messages`;
+
+  const body = `
+    <h2 style="margin:0 0 6px;font-size:20px;color:#111827;font-weight:800;">
+      💬 New Customer Inquiry Received
+    </h2>
+    <p style="margin:0 0 20px;font-size:14px;color:#6b7280;">
+      A customer has submitted a new inquiry via the contact form.
+    </p>
+
+    <!-- Details Card -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:24px;">
+      <tr>
+        <td style="padding:14px 20px;font-size:12px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #e5e7eb;background:#f3f4f6;">
+          Customer & Inquiry Details
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:18px 20px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:13px;color:#374151;padding-bottom:8px;width:50%;">
+                <strong>Name:</strong><br/>
+                <span style="color:#111827;font-weight:600;">${contact.name}</span>
+              </td>
+              <td style="font-size:13px;color:#374151;padding-bottom:8px;">
+                <strong>Email:</strong><br/>
+                <a href="mailto:${contact.email}" style="color:#1d4ed8;text-decoration:none;">${contact.email}</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:13px;color:#374151;padding-bottom:8px;">
+                <strong>Phone:</strong><br/>
+                <span style="color:#6b7280;">${contact.phone || 'N/A'}</span>
+              </td>
+              <td style="font-size:13px;color:#374151;padding-bottom:8px;">
+                <strong>Ticket ID:</strong><br/>
+                <span style="font-family:monospace;font-size:12px;color:#6b7280;">${contact._id}</span>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-size:13px;color:#374151;padding-top:4px;padding-bottom:8px;">
+                <strong>Subject:</strong><br/>
+                <span style="color:#111827;font-weight:600;">${contact.subject || 'General Inquiry'}</span>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Message Box -->
+          <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-top:10px;">
+            <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;">Message</p>
+            <p style="margin:0;font-size:14px;color:#1f2937;line-height:1.6;white-space:pre-wrap;">${contact.message}</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <div style="text-align:center;margin-top:24px;">
+      <a href="${adminUrl}"
+         style="display:inline-block;background:#111827;color:#ffffff;font-size:13px;font-weight:700;padding:12px 28px;border-radius:999px;text-decoration:none;">
+        Respond in Admin Portal →
+      </a>
+    </div>
+  `;
+
+  return layout("New Contact Inquiry – Fade Find Admin", body);
+}
+
+// ── 9. Contact Status Update & Reply (to User) ────────────────────────────────
+
+export function contactStatusUpdateEmail(contact, adminReply = "") {
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+
+  const CONTACT_STATUS_MAP = {
+    pending:     { label: "Pending",     color: "#d97706", bg: "#fef3c7" },
+    in_progress: { label: "In Progress", color: "#1d4ed8", bg: "#dbeafe" },
+    resolved:    { label: "Resolved",    color: "#166534", bg: "#dcfce7" },
+    closed:      { label: "Closed",      color: "#4b5563", bg: "#f3f4f6" },
+  };
+
+  const badge = CONTACT_STATUS_MAP[contact.status] || CONTACT_STATUS_MAP.pending;
+
+  const statusMessages = {
+    in_progress: "Our team is actively looking into your inquiry and working on a resolution.",
+    resolved:    "Your inquiry has been marked as resolved! We hope our answer was helpful.",
+    closed:      "This support inquiry has now been closed.",
+    pending:     "Your inquiry has been received and is pending review.",
+  };
+
+  const body = `
+    <h2 style="margin:0 0 6px;font-size:22px;color:#111827;font-weight:800;">
+      Update on Your Inquiry 📬
+    </h2>
+    <p style="margin:0 0 20px;font-size:14px;color:#6b7280;">
+      Hi ${contact.name}, there has been an update on your support request.
+    </p>
+
+    <!-- Status badge -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="display:inline-block;background:${badge.bg};color:${badge.color};font-size:13px;font-weight:700;padding:8px 20px;border-radius:999px;letter-spacing:0.05em;text-transform:uppercase;">
+        Status: ${badge.label}
+      </div>
+    </div>
+
+    <p style="margin:0 0 20px;font-size:14px;color:#374151;text-align:center;line-height:1.6;">
+      ${statusMessages[contact.status] || "Your inquiry status has been updated."}
+    </p>
+
+    ${adminReply ? `
+    <!-- Team response -->
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px 20px;margin-bottom:24px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:0.05em;">
+        Response from Fade Find Team
+      </p>
+      <p style="margin:0;font-size:14px;color:#1e293b;line-height:1.6;white-space:pre-wrap;">
+        ${adminReply}
+      </p>
+    </div>` : ""}
+
+    <!-- Ticket snapshot -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;margin-bottom:24px;">
+      <tr>
+        <td style="padding:14px 20px;">
+          <p style="margin:0 0 6px;font-size:13px;color:#374151;">
+            <strong>Ticket ID:</strong> <span style="font-family:monospace;color:#6b7280;">${contact._id}</span>
+          </p>
+          <p style="margin:0 0 6px;font-size:13px;color:#374151;">
+            <strong>Subject:</strong> <span style="color:#111827;">${contact.subject || 'General Inquiry'}</span>
+          </p>
+          <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.5;">
+            <strong>Original Message:</strong> "${contact.message.length > 150 ? contact.message.slice(0, 150) + '...' : contact.message}"
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0 0 20px;font-size:13px;color:#6b7280;text-align:center;">
+      If you have further questions or need additional assistance, you can submit a new message anytime or visit your dashboard.
+    </p>
+
+    <div style="text-align:center;">
+      <a href="${clientUrl}/profile"
+         style="display:inline-block;background:#111827;color:#ffffff;font-size:13px;font-weight:700;padding:12px 28px;border-radius:999px;text-decoration:none;">
+        Open User Dashboard →
+      </a>
+    </div>
+  `;
+
+  return layout(`Inquiry ${badge.label} – Fade Find`, body);
+}
+

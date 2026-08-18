@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { showSuccess, showError } from '../lib/toastUtils';
@@ -10,8 +10,11 @@ export default function Login() {
   const [showPass, setShowPass] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  const from = location.state?.from || (new URLSearchParams(location.search)).get('redirect') || null;
 
   const validate = () => {
     const errs = {};
@@ -33,13 +36,20 @@ export default function Login() {
 
         showSuccess('Welcome back to Fade Find! 👋');
 
-        if (res.user?.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
+        const destination = from || (res.user?.role === 'admin' ? '/admin' : '/');
+        navigate(destination, { replace: true });
         setForm({ email: '', password: '' });
       } catch (err) {
+        if (err.data?.needsVerification) {
+          showSuccess(err.data.message || 'Account not verified yet. A fresh 6-digit OTP has been sent to your email!');
+          navigate('/verify-otp', {
+            state: {
+              email: err.data.email || form.email.trim(),
+              from,
+            },
+          });
+          return;
+        }
         showError(err.message || 'Login failed');
       } finally {
         setLoading(false);
@@ -124,7 +134,7 @@ export default function Login() {
 
           <p className="text-center text-sm text-gray-500 mt-6">
             New to Fade Find?{' '}
-            <Link to="/register" className="text-amber-700 font-semibold hover:underline">
+            <Link to="/register" state={{ from }} className="text-amber-700 font-semibold hover:underline">
               Create an account
             </Link>
           </p>

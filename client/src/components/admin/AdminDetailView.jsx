@@ -242,11 +242,20 @@ export default function AdminDetailView({ isOpen, onClose, title, type, data }) 
             {data.address && (
               <div className="p-4 bg-gray-50/60 rounded-xl border border-gray-100">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">
-                  Shipping Address
+                  Default Shipping Address
                 </span>
-                <p className="font-medium text-gray-800">{data.address.street || 'No street address'}</p>
-                <p className="text-gray-500 mt-0.5">
-                  {[data.address.city, data.address.state, data.address.zip, data.address.country].filter(Boolean).join(', ')}
+                <p className="font-semibold text-gray-800">
+                  {data.address.street || (typeof data.address === 'string' ? data.address : 'No street address specified')}
+                </p>
+                <p className="text-gray-500 text-xs mt-1">
+                  {[
+                    data.address.city,
+                    data.address.state,
+                    data.address.postalCode || data.address.zip,
+                    data.address.country || 'Pakistan',
+                  ]
+                    .filter(Boolean)
+                    .join(', ')}
                 </p>
               </div>
             )}

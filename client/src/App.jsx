@@ -45,8 +45,29 @@ const PageWrapper = ({ children }) => (
   </motion.div>
 );
 
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  }
+
+  return children;
+}
+
 function AdminRoute({ children }) {
   const { isAuthenticated, isAdmin, loading } = useAuth();
+  const location = useLocation();
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-950">
@@ -57,7 +78,7 @@ function AdminRoute({ children }) {
       </div>
     );
   }
-  if (!isAuthenticated) return <Navigate to="/login" replace state={{ from: '/admin' }} />;
+  if (!isAuthenticated) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   if (!isAdmin)          return <Navigate to="/" replace />;
   return children;
 }
@@ -101,8 +122,22 @@ function AppRoutes() {
           <Route path="/forgot-password" element={<PageWrapper><ForgotPassword /></PageWrapper>} />
           <Route path="/reset-password"  element={<PageWrapper><ForgotPassword /></PageWrapper>} />
           <Route path="/cart"     element={<PageWrapper><Cart /></PageWrapper>} />
-          <Route path="/checkout" element={<PageWrapper><Checkout /></PageWrapper>} />
-          <Route path="/profile"  element={<PageWrapper><Profile /></PageWrapper>} />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute>
+                <PageWrapper><Checkout /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <PageWrapper><Profile /></PageWrapper>
+              </ProtectedRoute>
+            }
+          />
           <Route path="/track"    element={<PageWrapper><OrderTracking /></PageWrapper>} />
           <Route path="/track/:trackingNumber" element={<PageWrapper><OrderTracking /></PageWrapper>} />
           <Route

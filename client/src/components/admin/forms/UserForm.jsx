@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { User, Lock, Mail, Phone, MapPin } from 'lucide-react';
+import { User, Lock, Mail, Phone, MapPin, Camera, Upload } from 'lucide-react';
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD && import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : 'http://localhost:5000');
+
+function resolveImg(path) {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:') || path.startsWith('data:')) {
+    return path;
+  }
+  const cleanBase = BASE_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${cleanBase}${cleanPath}`;
+}
 
 export default function UserForm({ initialData = null, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
@@ -19,6 +31,9 @@ export default function UserForm({ initialData = null, onSubmit, onCancel }) {
     },
   });
 
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -33,10 +48,13 @@ export default function UserForm({ initialData = null, onSubmit, onCancel }) {
           street: initialData.address?.street || '',
           city: initialData.address?.city || '',
           state: initialData.address?.state || '',
-          zip: initialData.address?.zip || '',
+          zip: initialData.address?.zip || initialData.address?.postalCode || '',
           country: initialData.address?.country || 'Pakistan',
         },
       });
+      if (initialData.avatar) {
+        setAvatarPreview(resolveImg(initialData.avatar));
+      }
     }
   }, [initialData]);
 
@@ -59,21 +77,61 @@ export default function UserForm({ initialData = null, onSubmit, onCancel }) {
     }));
   };
 
+  const handleAvatarFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim()) return;
     if (!initialData && !formData.password) return; // Password required on create
 
-    const submitPayload = { ...formData };
-    if (initialData && !submitPayload.password) {
-      delete submitPayload.password;
+    if (avatarFile) {
+      const fd = new FormData();
+      fd.append('name', formData.name.trim());
+      fd.append('email', formData.email.trim());
+      if (formData.password) fd.append('password', formData.password);
+      fd.append('role', formData.role);
+      fd.append('isVerified', formData.isVerified);
+      fd.append('phone', formData.phone.trim());
+      fd.append('address', JSON.stringify(formData.address));
+      fd.append('avatar', avatarFile);
+      onSubmit(fd);
+    } else {
+      const submitPayload = { ...formData };
+      if (initialData && !submitPayload.password) {
+        delete submitPayload.password;
+      }
+      onSubmit(submitPayload);
     }
-
-    onSubmit(submitPayload);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Avatar Image Upload & Preview */}
+      <div className="flex items-center gap-4 p-3.5 bg-gray-50 rounded-2xl border border-gray-200">
+        <div className="w-14 h-14 rounded-2xl border-2 border-gray-200 overflow-hidden bg-white shrink-0 shadow-xs flex items-center justify-center">
+          {avatarPreview ? (
+            <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center font-bold text-white text-lg">
+              {(formData.name?.[0] || 'U').toUpperCase()}
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <label className="block text-xs font-bold text-gray-800 mb-1">User Avatar / Photo</label>
+          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 hover:border-amber-400 rounded-xl text-xs font-bold text-gray-700 shadow-xs transition-colors">
+            <Camera size={13} className="text-amber-600" />
+            <span>{avatarFile ? 'Change File' : 'Upload Image (server/uploads/user)'}</span>
+            <input type="file" accept="image/*" className="hidden" onChange={handleAvatarFileChange} />
+          </label>
+        </div>
+      </div>
+
       {/* Full Name & Email */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -141,35 +199,19 @@ export default function UserForm({ initialData = null, onSubmit, onCancel }) {
         </div>
       </div>
 
-      {/* Avatar URL & Phone */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-            Avatar Image URL
-          </label>
-          <input
-            type="url"
-            name="avatar"
-            value={formData.avatar}
-            onChange={handleChange}
-            placeholder="https://images.unsplash.com/..."
-            className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 transition-all"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-            <Phone size={13} className="text-[#c9a96e]" /> Phone Number
-          </label>
-          <input
-            type="text"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="+92 300 1234567"
-            className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 transition-all"
-          />
-        </div>
+      {/* Phone Number */}
+      <div>
+        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+          <Phone size={13} className="text-[#c9a96e]" /> Phone Number
+        </label>
+        <input
+          type="text"
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+          placeholder="+92 300 1234567"
+          className="w-full px-3.5 py-2.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 transition-all"
+        />
       </div>
 
       {/* Address Sub-form */}

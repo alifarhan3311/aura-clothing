@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   ShoppingBag, Heart, Search, User, Menu, X, ChevronDown,
-  LogOut, LayoutDashboard, MapPin, Sparkles
+  LogOut, LayoutDashboard, MapPin, Sparkles, Command
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import SearchModal from '../ui/SearchModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -49,8 +50,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const { cartCount } = useCart();
@@ -67,7 +67,6 @@ export default function Navbar() {
 
   useEffect(() => {
     setMobileOpen(false);
-    setSearchOpen(false);
     setUserMenuOpen(false);
   }, [location]);
 
@@ -86,14 +85,17 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-      setSearchOpen(false);
-    }
-  };
+  // Global shortcut to open Search Modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchModalOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <>
@@ -153,18 +155,33 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* ── Right icons ── */}
-            <div className="flex items-center gap-1">
-              {/* Search */}
+            {/* ── Right actions ── */}
+            <div className="flex items-center gap-2 sm:gap-2.5">
+              {/* Desktop Search Trigger Button with Shortcut Hint */}
               <button
-                onClick={() => setSearchOpen((s) => !s)}
-                className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="Search"
+                type="button"
+                onClick={() => setSearchModalOpen(true)}
+                className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-gray-100/90 hover:bg-gray-200/80 border border-gray-200/60 rounded-full text-xs text-gray-500 transition-all shadow-2xs group cursor-pointer"
+                title="Search products (Cmd+K or Ctrl+K)"
               >
-                <Search size={18} className="text-gray-700" />
+                <Search size={14} className="text-gray-400 group-hover:text-amber-600 transition-colors" />
+                <span className="font-medium text-gray-500 group-hover:text-gray-700">Search products…</span>
+                <kbd className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-bold text-gray-400 bg-white border border-gray-200 rounded-md shadow-2xs ml-1">
+                  <span>⌘</span>K
+                </kbd>
               </button>
 
-              {/* User */}
+              {/* Mobile Search Icon Button */}
+              <button
+                type="button"
+                onClick={() => setSearchModalOpen(true)}
+                className="sm:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-700"
+                aria-label="Search products"
+              >
+                <Search size={19} />
+              </button>
+
+              {/* User Menu */}
               {isAuthenticated ? (
                 <div className="hidden md:block relative" ref={userMenuRef}>
                   <button
@@ -217,7 +234,7 @@ export default function Navbar() {
                         <div className="border-t border-gray-100 mt-1 pt-1">
                           <button
                             onClick={() => { logout(); navigate('/'); }}
-                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors"
+                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                           >
                             <LogOut size={14} /> Sign Out
                           </button>
@@ -229,65 +246,27 @@ export default function Navbar() {
               ) : (
                 <Link
                   to="/login"
-                  className="hidden md:flex w-9 h-9 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                  className="hidden md:flex items-center gap-1.5 text-xs font-bold text-gray-800 hover:text-amber-700 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors"
                 >
-                  <User size={18} className="text-gray-700" />
+                  <User size={15} /> Sign In
                 </Link>
               )}
 
-              {/* Cart */}
+              {/* Cart Button */}
               <Link
                 to="/cart"
                 className="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-                aria-label={`Cart (${cartCount} items)`}
+                aria-label={`Shopping cart with ${cartCount} items`}
               >
-                <ShoppingBag size={18} className="text-gray-700" />
-                <AnimatePresence>
-                  {cartCount > 0 && (
-                    <motion.span
-                      key={cartCount}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                      className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-gray-900 text-white text-[10px] font-black rounded-full flex items-center justify-center px-0.5"
-                    >
-                      {cartCount}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                <ShoppingBag size={18} className="text-gray-800" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-amber-600 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-scale-in">
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
               </Link>
             </div>
           </div>
-
-          {/* Search bar */}
-          <AnimatePresence>
-            {searchOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden border-t border-gray-100"
-              >
-                <form onSubmit={handleSearch} className="py-3 flex gap-2">
-                  <input
-                    autoFocus
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products, categories…"
-                    className="flex-1 bg-gray-50 rounded-xl px-4 py-2.5 text-sm outline-none border border-gray-200 focus:border-amber-400 transition-colors"
-                  />
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-amber-600 transition-colors"
-                  >
-                    Search
-                  </button>
-                </form>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </header>
 
@@ -319,7 +298,26 @@ export default function Navbar() {
                 </button>
               </div>
 
-              <nav className="flex-1 p-4 space-y-1">
+              <div className="p-4">
+                {/* Mobile Search Button */}
+                <button
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setSearchModalOpen(true);
+                  }}
+                  className="w-full flex items-center justify-between p-3 rounded-2xl bg-gray-50 border border-gray-200/80 text-xs font-semibold text-gray-700 hover:bg-amber-50/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 text-gray-500">
+                    <Search size={16} className="text-amber-600" />
+                    <span>Search all products…</span>
+                  </div>
+                  <kbd className="px-2 py-0.5 text-[10px] font-bold text-gray-400 bg-white border border-gray-200 rounded-md">
+                    ⌘K
+                  </kbd>
+                </button>
+              </div>
+
+              <nav className="flex-1 px-4 space-y-1">
                 {NAV_LINKS.map((link) => (
                   <NavLink
                     key={link.to}
@@ -356,7 +354,7 @@ export default function Navbar() {
                     )}
                     <button
                       onClick={() => { logout(); navigate('/'); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer"
                     >
                       <LogOut size={18} /> Sign Out
                     </button>
@@ -377,6 +375,9 @@ export default function Navbar() {
 
       {/* Spacer */}
       <div className="h-16 md:h-[68px]" />
+
+      {/* ── Global Product Search Modal (Redis Cache-Aside) ── */}
+      <SearchModal isOpen={searchModalOpen} onClose={() => setSearchModalOpen(false)} />
     </>
   );
 }

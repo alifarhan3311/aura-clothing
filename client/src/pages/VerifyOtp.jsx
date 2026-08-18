@@ -102,8 +102,8 @@ export default function VerifyOtp() {
     try {
       const res = await verifyOTP(email.trim(), fullOtp);
       showSuccess(res.message || 'Email verified! Welcome 🎉');
-      // verifyOTP saves session internally, redirect home or admin
-      navigate(res.user?.role === 'admin' ? '/admin' : '/');
+      const destination = location.state?.from || (res.user?.role === 'admin' ? '/admin' : '/');
+      navigate(destination, { replace: true });
     } catch (err) {
       showError(err.message || 'Invalid or expired OTP');
       // shake the inputs

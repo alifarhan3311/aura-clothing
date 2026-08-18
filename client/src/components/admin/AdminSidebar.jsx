@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Sliders,
   Store,
+  MessageSquare,
 } from 'lucide-react';
 
 export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
@@ -72,6 +73,13 @@ export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
       path: '/admin/users',
       icon: Users,
       count: statsCounts.users,
+    },
+    {
+      name: 'Inquiries',
+      path: '/admin/messages',
+      icon: MessageSquare,
+      count: statsCounts.inquiries,
+      alertCount: statsCounts.pendingInquiries,
     },
   ];
 
@@ -157,19 +165,7 @@ export default function AdminSidebar({ statsCounts = {}, onCloseMobile }) {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-white/5 space-y-2">
-        {/* Backend status */}
-        <div className="flex items-center gap-2.5 px-3 py-2.5 bg-white/3 rounded-xl border border-white/5">
-          <div className="relative shrink-0">
-            <div className="w-2 h-2 rounded-full bg-emerald-400" />
-            <div className="absolute inset-0 w-2 h-2 rounded-full bg-emerald-400 animate-ping opacity-40" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold text-gray-300 leading-none">Live Backend</p>
-            <p className="text-[10px] text-gray-600 mt-0.5 truncate">MongoDB · REST API</p>
-          </div>
-        </div>
-
+      <div className="p-3 border-t border-white/5">
         <NavLink
           to="/"
           className="flex items-center justify-center gap-2 w-full py-2.5 px-3 bg-white/4 text-gray-400 hover:text-white hover:bg-white/8 rounded-xl text-xs font-semibold transition-all border border-white/5 group"

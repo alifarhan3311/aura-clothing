@@ -63,3 +63,26 @@ export const authorizeRoles = (...roles) => {
     next();
   };
 };
+
+/**
+ * Optional Auth middleware:
+ * Attaches user to req.user if a valid token is supplied,
+ * but proceeds normally without error if no token is present.
+ */
+export const optionalAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id).select("-password");
+      if (user && user.isVerified) {
+        req.user = user;
+      }
+    }
+  } catch (err) {
+    // If token invalid, proceed as guest
+  }
+  next();
+};
+

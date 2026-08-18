@@ -112,6 +112,26 @@ export const api = {
     }),
 };
 
+/**
+ * Helper to safely construct URL query strings without "undefined" or nulls
+ */
+export function buildQuery(params = {}) {
+  const clean = {};
+  Object.entries(params).forEach(([k, v]) => {
+    if (
+      v !== undefined &&
+      v !== null &&
+      v !== "" &&
+      v !== "undefined" &&
+      v !== "null"
+    ) {
+      clean[k] = v;
+    }
+  });
+  const q = new URLSearchParams(clean).toString();
+  return q ? `?${q}` : "";
+}
+
 // ── Auth Service ──────────────────────────────────────────────────────────────
 export const authApi = {
   login: (credentials) => api.post("/auth/login", credentials),
@@ -122,15 +142,13 @@ export const authApi = {
   updateProfile: (formData) => api.upload("/auth/update-profile", formData, "PUT"),
   forgotPassword: (data) => api.post("/auth/forgot-password", data),
   resendForgotPasswordOTP: (data) => api.post("/auth/resend-forgot-password-otp", data),
+  verifyForgotPasswordOTP: (data) => api.post("/auth/verify-forgot-password-otp", data),
   updatePassword: (data) => api.post("/auth/update-password", data),
 };
 
 // ── Brand Service ─────────────────────────────────────────────────────────────
 export const brandApi = {
-  getAll: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return api.get(`/brands${query ? `?${query}` : ""}`);
-  },
+  getAll: (params = {}) => api.get(`/brands${buildQuery(params)}`),
   getById: (id) => api.get(`/brands/${id}`),
   create: (formDataOrJson) => {
     if (formDataOrJson instanceof FormData) {
@@ -150,16 +168,10 @@ export const brandApi = {
 
 // ── Category Service ──────────────────────────────────────────────────────────
 export const categoryApi = {
-  getAll: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return api.get(`/categories${query ? `?${query}` : ""}`);
-  },
+  getAll: (params = {}) => api.get(`/categories${buildQuery(params)}`),
   getById: (id) => api.get(`/categories/${id}`),
   // Fetch all active products that belong to a specific category
-  getProducts: (id, params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return api.get(`/categories/${id}/products${query ? `?${query}` : ""}`);
-  },
+  getProducts: (id, params = {}) => api.get(`/categories/${id}/products${buildQuery(params)}`),
   create: (formDataOrJson) => {
     if (formDataOrJson instanceof FormData) {
       return api.upload("/categories", formDataOrJson, "POST");
@@ -178,11 +190,9 @@ export const categoryApi = {
 
 // ── Product Service ───────────────────────────────────────────────────────────
 export const productApi = {
-  getAll: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return api.get(`/products${query ? `?${query}` : ""}`);
-  },
+  getAll: (params = {}) => api.get(`/products${buildQuery(params)}`),
   getById: (id) => api.get(`/products/${id}`),
+  search: (query) => api.get(`/products/search${buildQuery({ q: query })}`),
   // Convenience fetchers used by homepage sections
   getNewArrivals: (limit = 8) =>
     api.get(`/products?type=new-arrival&limit=${limit}&status=true`),
@@ -208,13 +218,20 @@ export const productApi = {
 
 // ── User Service (Admin) ──────────────────────────────────────────────────────
 export const userApi = {
-  getAll: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return api.get(`/users${query ? `?${query}` : ""}`);
-  },
+  getAll: (params = {}) => api.get(`/users${buildQuery(params)}`),
   getById: (id) => api.get(`/users/${id}`),
-  create: (data) => api.post("/users", data),
-  update: (id, data) => api.put(`/users/${id}`, data),
+  create: (formDataOrJson) => {
+    if (formDataOrJson instanceof FormData) {
+      return api.upload("/users", formDataOrJson, "POST");
+    }
+    return api.post("/users", formDataOrJson);
+  },
+  update: (id, formDataOrJson) => {
+    if (formDataOrJson instanceof FormData) {
+      return api.upload(`/users/${id}`, formDataOrJson, "PUT");
+    }
+    return api.put(`/users/${id}`, formDataOrJson);
+  },
   updateRole: (id, role) => api.patch(`/users/${id}/role`, { role }),
   delete: (id) => api.delete(`/users/${id}`),
 };
@@ -233,10 +250,7 @@ export const catalogApi = {
    * @param {object} params - page, limit, category, brand, size, color,
    *                          minPrice, maxPrice, type, sortBy, order, search
    */
-  getBySection: (section, params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return api.get(`/catalog/${section}${query ? `?${query}` : ""}`);
-  },
+  getBySection: (section, params = {}) => api.get(`/catalog/${section}${buildQuery(params)}`),
 
   /**
    * GET /api/catalog/:section/meta
@@ -247,10 +261,7 @@ export const catalogApi = {
 
 // ── Coupon Service ────────────────────────────────────────────────────────────
 export const couponApi = {
-  getAll: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return api.get(`/coupons${query ? `?${query}` : ""}`);
-  },
+  getAll: (params = {}) => api.get(`/coupons${buildQuery(params)}`),
   getById: (id) => api.get(`/coupons/${id}`),
   create: (data) => api.post("/coupons", data),
   update: (id, data) => api.put(`/coupons/${id}`, data),
@@ -269,15 +280,9 @@ export const wishlistApi = {
 // ── Order Service ──────────────────────────────────────────────────────────────
 export const orderApi = {
   create: (data) => api.post("/orders", data),
-  getMy: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return api.get(`/orders/my${query ? `?${query}` : ""}`);
-  },
+  getMy: (params = {}) => api.get(`/orders/my${buildQuery(params)}`),
   getById: (id) => api.get(`/orders/${id}`),
-  getAll: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return api.get(`/orders${query ? `?${query}` : ""}`);
-  },
+  getAll: (params = {}) => api.get(`/orders${buildQuery(params)}`),
   updateStatus: (id, status, note = "") => api.patch(`/orders/${id}/status`, { status, note }),
   // User cancel request (sends to admin for approval, does NOT cancel immediately)
   cancel: (id, reason = "") => api.patch(`/orders/${id}/cancel`, { reason }),
@@ -332,4 +337,19 @@ export const departmentApi = {
   delete: (id) => api.delete(`/departments/${id}`),
 };
 
+// ── Contact & Support Service ───────────────────────────────────────────────
+export const contactApi = {
+  // Public/User submit contact inquiry
+  submit: (data) => api.post("/contact", data),
+  // Customer get their own inquiries
+  getMy: () => api.get("/contact/my"),
+  // Admin endpoints
+  getAll: (params = {}) => api.get(`/contact${buildQuery(params)}`),
+  getStats: () => api.get("/contact/stats"),
+  getById: (id) => api.get(`/contact/${id}`),
+  updateStatus: (id, data) => api.patch(`/contact/${id}/status`, data),
+  delete: (id) => api.delete(`/contact/${id}`),
+};
+
 export default api;
+

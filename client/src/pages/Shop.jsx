@@ -617,29 +617,6 @@ export default function Shop() {
               </button>
             ))}
 
-            {/* Category pills */}
-            {cats.length > 0 && section && (
-              <>
-                <span className="w-px h-5 bg-gray-200 mx-1 shrink-0" />
-                {cats.map((c) => {
-                  const on = active.category === c._id;
-                  return (
-                    <button
-                      key={c._id}
-                      onClick={() => updateFilter({ category: on ? undefined : c._id, page: 1 })}
-                      className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                        on
-                          ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
-                          : 'border-gray-200 text-gray-600 hover:border-amber-300 hover:text-amber-800 bg-white'
-                      }`}
-                    >
-                      {c.name}
-                    </button>
-                  );
-                })}
-              </>
-            )}
-
             {/* Search button */}
             <button
               onClick={() => setSearchOpen((v) => !v)}

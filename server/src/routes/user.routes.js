@@ -8,6 +8,7 @@ import {
   updateUserRole,
 } from "../controllers/user.controller.js";
 import { protect, authorizeRoles } from "../middlewares/auth.middleware.js";
+import { uploadUser } from "../middlewares/upload.middleware.js";
 
 const router = Router();
 
@@ -16,8 +17,8 @@ router.use(protect, authorizeRoles("admin"));
 
 router.get("/", getAllUsers);
 router.get("/:id", getUser);
-router.post("/", createUser);
-router.put("/:id", updateUser);
+router.post("/", uploadUser.single("avatar"), createUser);
+router.put("/:id", uploadUser.single("avatar"), updateUser);
 router.patch("/:id/role", updateUserRole);
 router.delete("/:id", deleteUser);
 
